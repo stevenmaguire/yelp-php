@@ -1,8 +1,8 @@
-<?php
+<?php namespace Stevenmaguire\Yelp\Test;
 
 use Stevenmaguire\Yelp\Client as Yelp;
 
-class YelpTest extends TestCase
+class YelpTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {

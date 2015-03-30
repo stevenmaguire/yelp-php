@@ -1,7 +1,7 @@
 {
     "name": "stevenmaguire/yelp-php",
     "description": "A php client for consumer Yelp API",
-    "version": "1.0.4",
+    "version": "1.0.6",
     "homepage" : "http://github.com/stevenmaguire/yelp-php",
     "authors" : [
         {
@@ -11,6 +11,12 @@
             "role" : "Developer"
         }
     ],
+    "keywords": [
+        "api",
+        "oauth1",
+        "yelp",
+        "php"
+    ],
     "license": "MIT",
     "require": {
         "php": ">=5.4.0",
@@ -18,12 +24,6 @@
         "guzzlehttp/oauth-subscriber": "0.1.*"
     },
     "autoload": {
-        "classmap": [
-            "tests/TestCase.php"
-        ],
-        "psr-0": {
-            "Stevenmaguire\\Yelp\\": "src/"
-        },
         "psr-4": {
             "Stevenmaguire\\Yelp\\": "src/"
         }
