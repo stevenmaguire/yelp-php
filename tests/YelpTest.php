@@ -64,4 +64,14 @@ class YelpTest extends \PHPUnit_Framework_TestCase
         $this->assertNotEmpty($results->businesses);
         $this->assertEquals($default_limit, count($results->businesses));
     }
+
+    public function test_It_Can_Find_Business_By_Id_With_Special_Characters()
+    {
+        $business_id = 'xware42-gmbh-münchen-2';
+
+        $business = $this->client->getBusiness($business_id);
+
+        $this->assertInstanceOf('stdClass', $business);
+        $this->assertEquals($business_id, $business->id);
+    }
 }
