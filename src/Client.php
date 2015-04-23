@@ -225,7 +225,9 @@ class Client
         try {
             $response = $client->get($url, ['auth' => 'oauth']);
         } catch (ClientException $e) {
-            throw new Exception($e->getMessage());
+            $exception = new Exception($e->getMessage());
+
+            throw $exception->setResponseBody($e->getResponse()->getBody());
         }
 
         return json_decode($response->getBody());
