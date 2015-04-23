@@ -157,7 +157,7 @@ class Client
      */
     public function getBusiness($business_id)
     {
-        $business_path = $this->business_path . $business_id;
+        $business_path = $this->business_path . urlencode($business_id);
 
         return $this->request($business_path);
     }

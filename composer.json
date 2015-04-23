@@ -1,7 +1,6 @@
 {
     "name": "stevenmaguire/yelp-php",
     "description": "A php client for consumer Yelp API",
-    "version": "1.0.6",
     "homepage" : "http://github.com/stevenmaguire/yelp-php",
     "authors" : [
         {
