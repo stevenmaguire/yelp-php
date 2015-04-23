@@ -1,7 +1,7 @@
 # Changelog
 All Notable changes to `yelp-php` will be documented in this file
 
-## 1.0.6 - 2015-04-23
+## 1.0.7 - 2015-04-23
 
 ### Added
 - Added support to urlencode business ids before fetching business record
