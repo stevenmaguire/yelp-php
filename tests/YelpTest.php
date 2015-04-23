@@ -1,5 +1,6 @@
 <?php namespace Stevenmaguire\Yelp\Test;
 
+use Stevenmaguire\Yelp\Exception;
 use Stevenmaguire\Yelp\Client as Yelp;
 
 class YelpTest extends \PHPUnit_Framework_TestCase
@@ -24,6 +25,18 @@ class YelpTest extends \PHPUnit_Framework_TestCase
         $business_id = 'the-motel-bar-chicago';
 
         $business = $client->getBusiness($business_id);
+    }
+
+    public function test_Exceptions_From_Http_Contain_Response_Body()
+    {
+        $client = new Yelp();
+        $business_id = 'the-motel-bar-chicago';
+
+        try {
+            $business = $client->getBusiness($business_id);
+        } catch (Exception $e) {
+            $this->assertNotNull($e->getResponseBody());
+        }
     }
 
     public function test_It_Can_Find_Business_By_Id()
