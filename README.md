@@ -20,7 +20,7 @@ or update your `composer.json` file to include:
 
 ```json
   "require": {
-    "stevenmaguire/yelp-php": "~1.0"
+    "stevenmaguire/yelp-php": "~1.1"
   }
 ```
 Run `composer update`
@@ -35,7 +35,7 @@ Run `composer update`
         'consumer_secret' => 'YOUR CONSUMER SECRET',
         'token' => 'YOUR TOKEN',
         'token_secret' => 'YOUR TOKEN SECRET',
-        'api_host' => 'api.yelp.com'
+        'api_host' => 'api.yelp.com' // Optional, default 'api.yelp.com'
     ));
 ```
 
@@ -57,6 +57,15 @@ $results = $client->getBusiness('union-chicago-3');
 $client->setDefaultLocation('Chicago, IL')  // default location for all searches if location not provided
     ->setDefaultTerm('Sushi')               // default keyword for all searches if term not provided
     ->setSearchLimit(20);                   // number of records to return
+```
+
+### Exceptions
+
+If the API request results in an Http error, the client will throw a `Stevenmaguire\Yelp\Exception` that includes the response body, as a string, from the Yelp API.
+
+```php
+$responseBody = $e->getResponseBody(); // string from Http request
+$responseBodyObject = json_decode($responseBody);
 ```
 
 ## Testing
