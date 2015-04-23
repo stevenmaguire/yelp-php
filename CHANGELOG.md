@@ -1,6 +1,23 @@
 # Changelog
 All Notable changes to `yelp-php` will be documented in this file
 
+## 1.1.0 - 2015-04-23
+
+### Added
+- Added Http response body to Exception
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Nothing
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.0.7 - 2015-04-23
 
 ### Added
