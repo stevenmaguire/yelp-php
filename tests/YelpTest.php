@@ -80,7 +80,7 @@ class YelpTest extends \PHPUnit_Framework_TestCase
 
     public function test_It_Can_Find_Business_By_Id_With_Special_Characters()
     {
-        $business_id = 'xware42-gmbh-münchen-2';
+        $business_id = 'xware42-münchen-3';
 
         $business = $this->client->getBusiness($business_id);
 
