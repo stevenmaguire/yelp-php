@@ -45,6 +45,12 @@ Run `composer update`
 $results = $client->search(array('term' => 'Sushi', 'location' => 'Chicago, IL'));
 ```
 
+### Search by phone number
+
+```php
+$results = $client->searchByPhone(array('phone' => '867-5309'));
+```
+
 ### Locate details for a specific business by Yelp business id
 
 ```php

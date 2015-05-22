@@ -62,6 +62,18 @@ class YelpTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(3, count($results->businesses));
     }
 
+    public function test_It_Can_Search_By_Phone()
+    {
+        $phone = '(312) 822-2900';
+        $attributes = ['phone' => $phone];
+
+        $results = $this->client->searchByPhone($attributes);
+
+        $this->assertInstanceOf('stdClass', $results);
+        $this->assertNotEmpty($results->businesses);
+        $this->assertEquals(1, count($results->businesses));
+    }
+
     public function test_It_Can_Set_Defaults()
     {
         $default_term = 'stores';
