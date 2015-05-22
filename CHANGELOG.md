@@ -1,6 +1,23 @@
 # Changelog
 All Notable changes to `yelp-php` will be documented in this file
 
+## 1.2.0 - 2015-05-21
+
+### Added
+- Added search by phone number method
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Nothing
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.1.0 - 2015-04-23
 
 ### Added
