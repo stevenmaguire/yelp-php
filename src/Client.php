@@ -77,6 +77,13 @@ class Client
     private $business_path = '/v2/business/';
 
     /**
+     * Phone search path
+     *
+     * @var string
+     */
+    private $phone_search_path = '/v2/phone_search/';
+
+    /**
      * Create new client
      *
      * @param array $configuration
@@ -144,6 +151,22 @@ class Client
     {
         $query_string = $this->buildQueryParams($attributes);
         $search_path = $this->search_path . "?" . $query_string;
+
+        return $this->request($search_path);
+    }
+
+    /**
+     * Search for businesses by phone number
+     *
+     * @see https://www.yelp.com/developers/documentation/v2/phone_search
+     *
+     * @param    array    $attributes   Query attributes
+     *
+     * @return   stdClass               The JSON response from the request
+     */
+    public function searchByPhone($attributes = [])
+    {
+        $search_path = $this->phone_search_path . "?" . http_build_query($attributes);
 
         return $this->request($search_path);
     }
