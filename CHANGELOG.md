@@ -1,6 +1,23 @@
 # Changelog
 All Notable changes to `yelp-php` will be documented in this file
 
+## 1.2.1 - 2015-08-14
+
+### Added
+- Nothing
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Nothing
+
+### Removed
+- Superfluous dependency
+
+### Security
+- Nothing
+
 ## 1.2.0 - 2015-05-21
 
 ### Added
