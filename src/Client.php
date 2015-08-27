@@ -1,6 +1,7 @@
 <?php namespace Stevenmaguire\Yelp;
 
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
 use GuzzleHttp\Exception\ClientException;
 
@@ -234,15 +235,21 @@ class Client
      */
     private function request($path)
     {
-        $client = new HttpClient;
-        $oauth = new Oauth1([
+        $stack = HandlerStack::create();
+
+        $middleware = new Oauth1([
             'consumer_key'    => $this->consumer_key,
             'consumer_secret' => $this->consumer_secret,
             'token'           => $this->token,
             'token_secret'    => $this->token_secret
         ]);
 
-        $client->getEmitter()->attach($oauth);
+        $stack->push($middleware);
+
+        $client = new HttpClient([
+            'handler' => $stack
+        ]);
+
         $url = $this->buildUnsignedUrl($this->api_host, $path);
 
         try {
