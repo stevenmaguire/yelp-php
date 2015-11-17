@@ -1,6 +1,23 @@
 # Changelog
 All Notable changes to `yelp-php` will be documented in this file
 
+## 1.4.1 - 2015-11-17
+
+### Added
+- Improved test suite performance
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Nothing
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.4.0 - 2015-08-27
 
 ### Added

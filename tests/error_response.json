@@ -1,0 +1,7 @@
+{
+    "error": {
+        "text": "Invalid parameter",
+        "id": "INVALID_PARAMETER",
+        "field": "location"
+    }
+}

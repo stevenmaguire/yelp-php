@@ -12,77 +12,84 @@ class Client
      *
      * @var string
      */
-    private $api_host;
+    protected $apiHost;
 
     /**
      * Consumer key
      *
      * @var string
      */
-    private $consumer_key;
+    protected $consumerKey;
 
     /**
      * Consumer secret
      *
      * @var string
      */
-    private $consumer_secret;
+    protected $consumerSecret;
 
     /**
      * Access token
      *
      * @var string
      */
-    private $token;
+    protected $token;
 
     /**
      * Access token secret
      *
      * @var string
      */
-    private $token_secret;
+    protected $tokenSecret;
 
     /**
      * Default search term
      *
      * @var string
      */
-    private $default_term = 'bar';
+    protected $defaultTerm = 'bar';
 
     /**
      * Default location
      *
      * @var string
      */
-    private $default_location = 'Chicago, IL';
+    protected $defaultLocation = 'Chicago, IL';
 
     /**
      * Default search limit
      *
      * @var integer
      */
-    private $search_limit = 3;
+    protected $searchLimit = 3;
 
     /**
      * Search path
      *
      * @var string
      */
-    private $search_path = '/v2/search/';
+    protected $searchPath = '/v2/search/';
 
     /**
      * Business path
      *
      * @var string
      */
-    private $business_path = '/v2/business/';
+    protected $businessPath = '/v2/business/';
 
     /**
      * Phone search path
      *
      * @var string
      */
-    private $phone_search_path = '/v2/phone_search/';
+    protected $phoneSearchPath = '/v2/phone_search/';
+
+    /**
+     * [$httpClient description]
+     *
+     * @var [type]
+     */
+    protected $httpClient;
 
     /**
      * Create new client
@@ -93,52 +100,126 @@ class Client
     {
         $this->parseConfiguration($configuration);
 
-        $this->consumer_key = $configuration['consumer_key'];
-        $this->consumer_secret = $configuration['consumer_secret'];
+        $this->consumerKey = $configuration['consumerKey'];
+        $this->consumerSecret = $configuration['consumerSecret'];
         $this->token = $configuration['token'];
-        $this->token_secret = $configuration['token_secret'];
-        $this->api_host = $configuration['api_host'];
+        $this->tokenSecret = $configuration['tokenSecret'];
+        $this->apiHost = $configuration['apiHost'];
+        $this->createHttpClient();
     }
 
     /**
-     * Set default location
+     * Build query string params using defaults
      *
-     * @param string $location
+     * @param  array $attributes
      *
-     * @return Client
+     * @return string
      */
-    public function setDefaultLocation($location)
+    public function buildQueryParams($attributes = [])
     {
-        $this->default_location = $location;
-        return $this;
+        $defaults = array(
+            'term' => $this->defaultTerm,
+            'location' => $this->defaultLocation,
+            'limit' => $this->searchLimit
+        );
+        $attributes = array_merge($defaults, $attributes);
+
+        return http_build_query($attributes);
     }
 
     /**
-     * Set default term
+     * Build unsigned url
      *
-     * @param string $term
+     * @param  string   $host
+     * @param  string   $path
      *
-     * @return Client
+     * @return string   Unsigned url
      */
-    public function setDefaultTerm($term)
+    protected function buildUnsignedUrl($host, $path)
     {
-        $this->default_term = $term;
-        return $this;
+        return "http://" . $host . $path;
     }
 
     /**
-     * Set search limit
-     *
-     * @param integer $limit
+     * Builds and sets a preferred http client.
      *
      * @return Client
      */
-    public function setSearchLimit($limit)
+    protected function createHttpClient()
     {
-        if (is_int($limit)) {
-            $this->search_limit = $limit;
+        $stack = HandlerStack::create();
+
+        $middleware = new Oauth1([
+            'consumerKey'    => $this->consumerKey,
+            'consumerSecret' => $this->consumerSecret,
+            'token'           => $this->token,
+            'tokenSecret'    => $this->tokenSecret
+        ]);
+
+        $stack->push($middleware);
+
+        $client = new HttpClient([
+            'handler' => $stack
+        ]);
+
+        return $this->setHttpClient($client);
+    }
+
+    /**
+     * Query the Business API by business id
+     *
+     * @param    string   $businessId      The ID of the business to query
+     *
+     * @return   stdClass                   The JSON response from the request
+     */
+    public function getBusiness($businessId)
+    {
+        $businessPath = $this->businessPath . urlencode($businessId);
+
+        return $this->request($businessPath);
+    }
+
+    /**
+     * Parse configuration using defaults
+     *
+     * @param  array $configuration
+     *
+     * @return array $configuration
+     */
+    protected function parseConfiguration(&$configuration = [])
+    {
+        $defaults = array(
+            'consumerKey' => null,
+            'consumerSecret' => null,
+            'token' => null,
+            'tokenSecret' => null,
+            'apiHost' => 'api.yelp.com'
+        );
+
+        $configuration = array_merge($defaults, $configuration);
+    }
+
+    /**
+     * Makes a request to the Yelp API and returns the response
+     *
+     * @param    string $path    The path of the APi after the domain
+     *
+     * @return   stdClass The JSON response from the request
+     * @throws   Exception
+     */
+    protected function request($path)
+    {
+        $url = $this->buildUnsignedUrl($this->apiHost, $path);
+
+        try {
+            $response = $this->httpClient->get($url, ['auth' => 'oauth']);
+        } catch (ClientException $e) {
+            $exception = new Exception($e->getMessage());
+
+            throw $exception->setResponseBody($e->getResponse()->getBody());
         }
-        return $this;
+
+        return json_decode($response->getBody());
     }
 
     /**
@@ -151,9 +232,9 @@ class Client
     public function search($attributes = [])
     {
         $query_string = $this->buildQueryParams($attributes);
-        $search_path = $this->search_path . "?" . $query_string;
+        $searchPath = $this->searchPath . "?" . $query_string;
 
-        return $this->request($search_path);
+        return $this->request($searchPath);
     }
 
     /**
@@ -167,112 +248,63 @@ class Client
      */
     public function searchByPhone($attributes = [])
     {
-        $search_path = $this->phone_search_path . "?" . http_build_query($attributes);
+        $searchPath = $this->phoneSearchPath . "?" . http_build_query($attributes);
 
-        return $this->request($search_path);
+        return $this->request($searchPath);
     }
 
     /**
-     * Query the Business API by business_id
+     * Set default location
      *
-     * @param    string   $business_id      The ID of the business to query
+     * @param string $location
      *
-     * @return   stdClass                   The JSON response from the request
+     * @return Client
      */
-    public function getBusiness($business_id)
+    public function setDefaultLocation($location)
     {
-        $business_path = $this->business_path . urlencode($business_id);
-
-        return $this->request($business_path);
+        $this->defaultLocation = $location;
+        return $this;
     }
 
     /**
-     * Parse configuration using defaults
+     * Set default term
      *
-     * @param  array $configuration
+     * @param string $term
      *
-     * @return array $configuration
+     * @return Client
      */
-    private function parseConfiguration(&$configuration = [])
+    public function setDefaultTerm($term)
     {
-        $defaults = array(
-            'consumer_key' => null,
-            'consumer_secret' => null,
-            'token' => null,
-            'token_secret' => null,
-            'api_host' => 'api.yelp.com'
-        );
-
-        $configuration = array_merge($defaults, $configuration);
+        $this->defaultTerm = $term;
+        return $this;
     }
 
     /**
-     * Build query string params using defaults
+     * Updates the yelp client's http client to the given http client. Client.
      *
-     * @param  array $attributes
+     * @param HttpClient  $client
      *
-     * @return string
+     * @return  Client
      */
-    private function buildQueryParams($attributes = [])
+    public function setHttpClient(HttpClient $client)
     {
-        $defaults = array(
-            'term' => $this->default_term,
-            'location' => $this->default_location,
-            'limit' => $this->search_limit
-        );
-        $attributes = array_merge($defaults, $attributes);
+        $this->httpClient = $client;
 
-        return http_build_query($attributes);
+        return $this;
     }
 
     /**
-     * Makes a request to the Yelp API and returns the response
+     * Set search limit
      *
-     * @param    string $path    The path of the APi after the domain
+     * @param integer $limit
      *
-     * @return   stdClass The JSON response from the request
-     * @throws   Exception
+     * @return Client
      */
-    private function request($path)
+    public function setSearchLimit($limit)
     {
-        $stack = HandlerStack::create();
-
-        $middleware = new Oauth1([
-            'consumer_key'    => $this->consumer_key,
-            'consumer_secret' => $this->consumer_secret,
-            'token'           => $this->token,
-            'token_secret'    => $this->token_secret
-        ]);
-
-        $stack->push($middleware);
-
-        $client = new HttpClient([
-            'handler' => $stack
-        ]);
-
-        $url = $this->buildUnsignedUrl($this->api_host, $path);
-
-        try {
-            $response = $client->get($url, ['auth' => 'oauth']);
-        } catch (ClientException $e) {
-            $exception = new Exception($e->getMessage());
-
-            throw $exception->setResponseBody($e->getResponse()->getBody());
+        if (is_int($limit)) {
+            $this->searchLimit = $limit;
         }
-
-        return json_decode($response->getBody());
-    }
-
-    /**
-     * Build unsigned url
-     *
-     * @param  string   $host
-     * @param  string   $path
-     *
-     * @return string   Unsigned url
-     */
-    private function buildUnsignedUrl($host, $path)
-    {
-        return "http://" . $host . $path;
+        return $this;
     }
 }
