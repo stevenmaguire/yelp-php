@@ -16,14 +16,6 @@ Via Composer
 ``` bash
 $ composer require stevenmaguire/yelp-php
 ```
-or update your `composer.json` file to include:
-
-```json
-  "require": {
-    "stevenmaguire/yelp-php": "~1.2"
-  }
-```
-Run `composer update`
 
 ## Usage
 
