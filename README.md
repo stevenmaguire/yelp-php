@@ -23,11 +23,11 @@ $ composer require stevenmaguire/yelp-php
 
 ```php
     $client = new Stevenmaguire\Yelp\Client(array(
-        'consumer_key' => 'YOUR COSUMER KEY',
-        'consumer_secret' => 'YOUR CONSUMER SECRET',
+        'consumerKey' => 'YOUR COSUMER KEY',
+        'consumerSecret' => 'YOUR CONSUMER SECRET',
         'token' => 'YOUR TOKEN',
-        'token_secret' => 'YOUR TOKEN SECRET',
-        'api_host' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+        'tokenSecret' => 'YOUR TOKEN SECRET',
+        'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
     ));
 ```
 

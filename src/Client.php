@@ -98,14 +98,8 @@ class Client
      */
     public function __construct($configuration = [])
     {
-        $this->parseConfiguration($configuration);
-
-        $this->consumerKey = $configuration['consumerKey'];
-        $this->consumerSecret = $configuration['consumerSecret'];
-        $this->token = $configuration['token'];
-        $this->tokenSecret = $configuration['tokenSecret'];
-        $this->apiHost = $configuration['apiHost'];
-        $this->createHttpClient();
+        $this->parseConfiguration($configuration)
+            ->createHttpClient();
     }
 
     /**
@@ -150,10 +144,10 @@ class Client
         $stack = HandlerStack::create();
 
         $middleware = new Oauth1([
-            'consumerKey'    => $this->consumerKey,
-            'consumerSecret' => $this->consumerSecret,
+            'consumer_key'    => $this->consumerKey,
+            'consumer_secret' => $this->consumerSecret,
             'token'           => $this->token,
-            'tokenSecret'    => $this->tokenSecret
+            'token_secret'    => $this->tokenSecret
         ]);
 
         $stack->push($middleware);
@@ -180,13 +174,30 @@ class Client
     }
 
     /**
+     * Maps legacy configuration keys to updated keys.
+     *
+     * @param  array   $configuration
+     *
+     * @return array
+     */
+    protected function mapConfiguration(array $configuration)
+    {
+        array_walk($configuration, function ($value, $key) use (&$configuration) {
+            $newKey = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $key))));
+            $configuration[$newKey] = $value;
+        });
+
+        return $configuration;
+    }
+
+    /**
      * Parse configuration using defaults
      *
      * @param  array $configuration
      *
-     * @return array $configuration
+     * @return client
      */
-    protected function parseConfiguration(&$configuration = [])
+    protected function parseConfiguration($configuration = [])
     {
         $defaults = array(
             'consumerKey' => null,
@@ -196,7 +207,11 @@ class Client
             'apiHost' => 'api.yelp.com'
         );
 
-        $configuration = array_merge($defaults, $configuration);
+        $configuration = array_merge($defaults, $this->mapConfiguration($configuration));
+
+        array_walk($configuration, [$this, 'setConfig']);
+
+        return $this;
     }
 
     /**
@@ -254,6 +269,23 @@ class Client
     }
 
     /**
+     * Attempts to set a given value.
+     *
+     * @param mixed   $value
+     * @param string  $key
+     *
+     * @return Client
+     */
+    protected function setConfig($value, $key)
+    {
+        if (property_exists($this, $key)) {
+            $this->$key = $value;
+        }
+
+        return $this;
+    }
+
+    /**
      * Set default location
      *
      * @param string $location
@@ -306,5 +338,21 @@ class Client
             $this->searchLimit = $limit;
         }
         return $this;
+    }
+
+    /**
+     * Retrives the value of a given property from the client.
+     *
+     * @param  string  $property
+     *
+     * @return mixed|null
+     */
+    public function __get($property)
+    {
+        if (property_exists($this, $property)) {
+            return $this->$property;
+        }
+
+        return null;
     }
 }

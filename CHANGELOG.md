@@ -1,6 +1,23 @@
 # Changelog
 All Notable changes to `yelp-php` will be documented in this file
 
+## 1.4.2 - 2015-11-23
+
+### Added
+- Nothing
+
+### Deprecated
+- Nothing
+
+### Fixed
+- OAuth1 subscriber configuration issue. (https://github.com/stevenmaguire/yelp-php/issues/9)
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.4.1 - 2015-11-17
 
 ### Added

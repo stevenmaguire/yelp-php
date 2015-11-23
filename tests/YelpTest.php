@@ -15,11 +15,11 @@ class YelpTest extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->client = new Yelp([
-            'consumer_key' =>       getenv('YELP_CONSUMER_KEY'),
-            'consumer_secret' =>    getenv('YELP_CONSUMER_SECRET'),
+            'consumerKey' =>       getenv('YELP_CONSUMER_KEY'),
+            'consumerSecret' =>    getenv('YELP_CONSUMER_SECRET'),
             'token' =>              getenv('YELP_ACCESS_TOKEN'),
-            'token_secret' =>       getenv('YELP_ACCESS_TOKEN_SECRET'),
-            'api_host' =>           'api.yelp.com'
+            'tokenSecret' =>       getenv('YELP_ACCESS_TOKEN_SECRET'),
+            'apiHost' =>           'api.yelp.com'
         ]);
     }
 
@@ -48,6 +48,26 @@ class YelpTest extends \PHPUnit_Framework_TestCase
         }
 
         return $client;
+    }
+
+    public function testConfigurationMapper()
+    {
+        $config = [
+            'consumer_key' =>       uniqid(),
+            'consumer_secret' =>    uniqid(),
+            'token' =>              uniqid(),
+            'token_secret' =>       uniqid(),
+            'api_host' =>           uniqid()
+        ];
+
+        $client = new Yelp($config);
+
+        $this->assertEquals($config['consumer_key'], $client->consumerKey);
+        $this->assertEquals($config['consumer_secret'], $client->consumerSecret);
+        $this->assertEquals($config['token'], $client->token);
+        $this->assertEquals($config['token_secret'], $client->tokenSecret);
+        $this->assertEquals($config['api_host'], $client->apiHost);
+        $this->assertNull($client->{uniqid()});
     }
 
     /**
