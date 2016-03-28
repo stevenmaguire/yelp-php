@@ -118,7 +118,7 @@ class Client
         );
         $attributes = array_merge($defaults, $attributes);
 
-        return http_build_query($attributes);
+        return $this->prepareQueryParams($attributes);
     }
 
     /**
@@ -163,12 +163,13 @@ class Client
      * Query the Business API by business id
      *
      * @param    string   $businessId      The ID of the business to query
+     * @param    array    $attributes      Optional attributes to include in query string
      *
      * @return   stdClass                   The JSON response from the request
      */
-    public function getBusiness($businessId)
+    public function getBusiness($businessId, $attributes = [])
     {
-        $businessPath = $this->businessPath . urlencode($businessId);
+        $businessPath = $this->businessPath . urlencode($businessId) . "?" . $this->prepareQueryParams($attributes);
 
         return $this->request($businessPath);
     }
@@ -212,6 +213,24 @@ class Client
         array_walk($configuration, [$this, 'setConfig']);
 
         return $this;
+    }
+
+    /**
+     * Updates query params array to apply yelp specific formatting rules.
+     *
+     * @param  array   $params
+     *
+     * @return string
+     */
+    protected function prepareQueryParams($params = [])
+    {
+        array_walk($params, function ($value, $key) use (&$params) {
+            if (is_bool($value)) {
+                $params[$key] = $value ? 'true' : 'false';
+            }
+        });
+
+        return http_build_query($params);
     }
 
     /**
@@ -263,7 +282,7 @@ class Client
      */
     public function searchByPhone($attributes = [])
     {
-        $searchPath = $this->phoneSearchPath . "?" . http_build_query($attributes);
+        $searchPath = $this->phoneSearchPath . "?" . $this->prepareQueryParams($attributes);
 
         return $this->request($searchPath);
     }
