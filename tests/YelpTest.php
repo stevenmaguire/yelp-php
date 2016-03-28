@@ -110,6 +110,20 @@ class YelpTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($business_id, $business->id);
     }
 
+    public function test_It_Can_Find_Business_By_Id_With_Attributes()
+    {
+        $attributes = ['actionLinks' => true];
+        $business_id = 'urban-curry-san-francisco';
+        $path = '/v2/business/'.urlencode($business_id).'?actionLinks=true';
+        $response = $this->getResponseJson('business');
+        $httpClient = $this->getHttpClient($path, 200, $response);
+
+        $business = $this->client->setHttpClient($httpClient)->getBusiness($business_id, $attributes);
+
+        $this->assertInstanceOf('stdClass', $business);
+        $this->assertEquals($business_id, $business->id);
+    }
+
     public function test_It_Can_Search_Bars_In_Chicago()
     {
         $term = 'bars';

@@ -1,6 +1,23 @@
 # Changelog
 All Notable changes to `yelp-php` will be documented in this file
 
+## 1.4.3 - 2016-03-28
+
+### Added
+- Support for additional parameters on `getBusiness`, enables support for actionLinks
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Nothing
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.4.2 - 2015-11-23
 
 ### Added
