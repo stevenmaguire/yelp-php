@@ -49,6 +49,14 @@ $results = $client->searchByPhone(array('phone' => '867-5309'));
 $results = $client->getBusiness('union-chicago-3');
 ```
 
+You may include [action links](http://engineeringblog.yelp.com/2015/07/yelp-api-now-returns-action-links.html) in your results by passing additional parameters with your request.
+
+```php
+$resultsWithActionLinks = $client->getBusiness('union-chicago-3', [
+    'actionLinks' => true
+]);
+```
+
 ### Configure defaults
 
 ```php
