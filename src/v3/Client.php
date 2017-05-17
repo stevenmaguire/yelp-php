@@ -8,6 +8,5 @@ class Client
 {
     public function __construct(array $options = array())
     {
-
     }
 }

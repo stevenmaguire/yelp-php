@@ -69,7 +69,7 @@ $responseBodyObject = json_decode($responseBody);
 ## Testing
 
 ``` bash
-$ phpunit
+$ ./vendor/bin/phpunit
 ```
 
 ## Contributing
