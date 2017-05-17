@@ -25,8 +25,9 @@ This package currently supports `v2` and `v3` (Fusion) of the Yelp API. Each ver
 
 Each version of the Yelp API maps to a different client, as the APIs are very different. A client factory is available to create appropriate clients.
 
+#### v2 Client Example
+
 ```php
-    // v2 Client
     $options = array(
         'consumerKey' => 'YOUR COSUMER KEY',
         'consumerSecret' => 'YOUR CONSUMER SECRET',
@@ -39,8 +40,11 @@ Each version of the Yelp API maps to a different client, as the APIs are very di
         $options,
         Stevenmaguire\Yelp\Version::TWO
     );
+```
 
-    // v3 Client
+#### v3 Client Example
+
+```php
     $options = array(
         'accessToken' => 'YOUR ACCESS TOKEN',
         'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
