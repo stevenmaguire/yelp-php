@@ -19,55 +19,47 @@ $ composer require stevenmaguire/yelp-php
 
 ## Usage
 
+This package currently supports `v2` and `v3` (Fusion) of the Yelp API. Each version of the Yelp API maps to a different client, as the APIs are very different. Each client has separate documentation; links provided below.
+
 ### Create client
 
+Each version of the Yelp API maps to a different client, as the APIs are very different. A client factory is available to create appropriate clients.
+
 ```php
-    $client = new Stevenmaguire\Yelp\Client(array(
+    // v2 Client
+    $options = array(
         'consumerKey' => 'YOUR COSUMER KEY',
         'consumerSecret' => 'YOUR CONSUMER SECRET',
         'token' => 'YOUR TOKEN',
         'tokenSecret' => 'YOUR TOKEN SECRET',
         'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
-    ));
+    );
+
+    $client = new Stevenmaguire\Yelp\ClientFactory::makeWith(
+        $options,
+        Stevenmaguire\Yelp\Version::TWO
+    );
+
+    // v3 Client
+    $options = array(
+        'accessToken' => 'YOUR ACCESS TOKEN',
+        'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+    );
+
+    $client = new Stevenmaguire\Yelp\ClientFactory::makeWith(
+        $options,
+        Stevenmaguire\Yelp\Version::THREE
+    );
 ```
 
-### Search by keyword and location
-
-```php
-$results = $client->search(array('term' => 'Sushi', 'location' => 'Chicago, IL'));
-```
-
-### Search by phone number
-
-```php
-$results = $client->searchByPhone(array('phone' => '867-5309'));
-```
-
-### Locate details for a specific business by Yelp business id
-
-```php
-$results = $client->getBusiness('union-chicago-3');
-```
-
-You may include [action links](http://engineeringblog.yelp.com/2015/07/yelp-api-now-returns-action-links.html) in your results by passing additional parameters with your request.
-
-```php
-$resultsWithActionLinks = $client->getBusiness('union-chicago-3', [
-    'actionLinks' => true
-]);
-```
-
-### Configure defaults
-
-```php
-$client->setDefaultLocation('Chicago, IL')  // default location for all searches if location not provided
-    ->setDefaultTerm('Sushi')               // default keyword for all searches if term not provided
-    ->setSearchLimit(20);                   // number of records to return
-```
+Version | Constant | Documentation
+--------|--------------
+v2 | `Stevenmaguire\Yelp\Version::TWO` | [API-GUIDE-v2.md](API-GUIDE-v2.md)
+v3 | `Stevenmaguire\Yelp\Version::THREE` | [API-GUIDE-v3.md](API-GUIDE-v3.md)
 
 ### Exceptions
 
-If the API request results in an Http error, the client will throw a `Stevenmaguire\Yelp\Exception` that includes the response body, as a string, from the Yelp API.
+If the API request results in an Http error, the client will throw a `Stevenmaguire\Yelp\Exception\HttpException` that includes the response body, as a string, from the Yelp API.
 
 ```php
 $responseBody = $e->getResponseBody(); // string from Http request

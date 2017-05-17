@@ -1,9 +1,12 @@
-<?php namespace Stevenmaguire\Yelp;
+<?php
+
+namespace Stevenmaguire\Yelp\v2;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
 use GuzzleHttp\Exception\ClientException;
+use Stevenmaguire\Yelp\Exception\HttpException;
 
 class Client
 {
@@ -96,7 +99,7 @@ class Client
      *
      * @param array $configuration
      */
-    public function __construct($configuration = [])
+    public function __construct(array $configuration = array())
     {
         $this->parseConfiguration($configuration)
             ->createHttpClient();
@@ -248,7 +251,7 @@ class Client
         try {
             $response = $this->httpClient->get($url, ['auth' => 'oauth']);
         } catch (ClientException $e) {
-            $exception = new Exception($e->getMessage());
+            $exception = new HttpException($e->getMessage());
 
             throw $exception->setResponseBody($e->getResponse()->getBody());
         }

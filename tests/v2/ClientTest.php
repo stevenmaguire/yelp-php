@@ -1,4 +1,6 @@
-<?php namespace Stevenmaguire\Yelp\Test;
+<?php
+
+namespace Stevenmaguire\Yelp\Test\v2;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\Exception\ClientException;
@@ -7,10 +9,10 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use Mockery as m;
 use Psr\Http\Message\ResponseInterface;
-use Stevenmaguire\Yelp\Exception;
-use Stevenmaguire\Yelp\Client as Yelp;
+use Stevenmaguire\Yelp\Exception\HttpException;
+use Stevenmaguire\Yelp\v2\Client as Yelp;
 
-class YelpTest extends \PHPUnit_Framework_TestCase
+class ClientTest extends \PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
@@ -71,7 +73,7 @@ class YelpTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException Stevenmaguire\Yelp\Exception
+     * @expectedException Stevenmaguire\Yelp\Exception\HttpException
      */
     public function test_It_Will_Fail_With_Invalid_OAuth_Credentials()
     {
@@ -92,7 +94,7 @@ class YelpTest extends \PHPUnit_Framework_TestCase
 
         try {
             $business = $this->client->setHttpClient($httpClient)->getBusiness($business_id);
-        } catch (Exception $e) {
+        } catch (HttpException $e) {
             $this->assertNotNull($e->getResponseBody());
         }
     }
