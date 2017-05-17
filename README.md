@@ -53,7 +53,7 @@ Each version of the Yelp API maps to a different client, as the APIs are very di
 ```
 
 Version | Constant | Documentation
---------|--------------
+--------|----------|--------------
 v2 | `Stevenmaguire\Yelp\Version::TWO` | [API-GUIDE-v2.md](API-GUIDE-v2.md)
 v3 | `Stevenmaguire\Yelp\Version::THREE` | [API-GUIDE-v3.md](API-GUIDE-v3.md)
 
