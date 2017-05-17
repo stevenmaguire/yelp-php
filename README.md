@@ -7,7 +7,7 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/stevenmaguire/yelp-php.svg?style=flat-square)](https://scrutinizer-ci.com/g/stevenmaguire/yelp-php)
 [![Total Downloads](https://img.shields.io/packagist/dt/stevenmaguire/yelp-php.svg?style=flat-square)](https://packagist.org/packages/stevenmaguire/yelp-php)
 
-A PHP client for authenticating with Yelp using OAuth 1 and consuming the search API.
+A PHP client for authenticating with Yelp using OAuth and consuming the API.
 
 ## Install
 
