@@ -3,19 +3,18 @@
 namespace Stevenmaguire\Yelp\v2;
 
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
-use GuzzleHttp\Exception\ClientException;
+use Stevenmaguire\Yelp\Contract\Http as HttpContract;
 use Stevenmaguire\Yelp\Exception\HttpException;
+use Stevenmaguire\Yelp\Tool\ConfigurationTrait;
+use Stevenmaguire\Yelp\Tool\HttpTrait;
 
-class Client
+class Client implements HttpContract
 {
-    /**
-     * API host url
-     *
-     * @var string
-     */
-    protected $apiHost;
+    use ConfigurationTrait,
+        HttpTrait;
 
     /**
      * Consumer key
@@ -88,20 +87,21 @@ class Client
     protected $phoneSearchPath = '/v2/phone_search/';
 
     /**
-     * [$httpClient description]
-     *
-     * @var [type]
-     */
-    protected $httpClient;
-
-    /**
      * Create new client
      *
-     * @param array $configuration
+     * @param array $options
      */
-    public function __construct(array $configuration = array())
+    public function __construct(array $options = array())
     {
-        $this->parseConfiguration($configuration)
+        $defaults = array(
+            'consumerKey' => null,
+            'consumerSecret' => null,
+            'token' => null,
+            'tokenSecret' => null,
+            'apiHost' => 'api.yelp.com'
+        );
+
+        $this->parseConfiguration($options, $defaults)
             ->createHttpClient();
     }
 
@@ -178,78 +178,19 @@ class Client
     }
 
     /**
-     * Maps legacy configuration keys to updated keys.
-     *
-     * @param  array   $configuration
-     *
-     * @return array
-     */
-    protected function mapConfiguration(array $configuration)
-    {
-        array_walk($configuration, function ($value, $key) use (&$configuration) {
-            $newKey = lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $key))));
-            $configuration[$newKey] = $value;
-        });
-
-        return $configuration;
-    }
-
-    /**
-     * Parse configuration using defaults
-     *
-     * @param  array $configuration
-     *
-     * @return client
-     */
-    protected function parseConfiguration($configuration = [])
-    {
-        $defaults = array(
-            'consumerKey' => null,
-            'consumerSecret' => null,
-            'token' => null,
-            'tokenSecret' => null,
-            'apiHost' => 'api.yelp.com'
-        );
-
-        $configuration = array_merge($defaults, $this->mapConfiguration($configuration));
-
-        array_walk($configuration, [$this, 'setConfig']);
-
-        return $this;
-    }
-
-    /**
-     * Updates query params array to apply yelp specific formatting rules.
-     *
-     * @param  array   $params
-     *
-     * @return string
-     */
-    protected function prepareQueryParams($params = [])
-    {
-        array_walk($params, function ($value, $key) use (&$params) {
-            if (is_bool($value)) {
-                $params[$key] = $value ? 'true' : 'false';
-            }
-        });
-
-        return http_build_query($params);
-    }
-
-    /**
      * Makes a request to the Yelp API and returns the response
      *
      * @param    string $path    The path of the APi after the domain
      *
      * @return   stdClass The JSON response from the request
-     * @throws   Exception
+     * @throws   Stevenmaguire\Yelp\Exception\HttpException
      */
     protected function request($path)
     {
         $url = $this->buildUnsignedUrl($this->apiHost, $path);
 
         try {
-            $response = $this->httpClient->get($url, ['auth' => 'oauth']);
+            $response = $this->getHttpClient()->get($url, ['auth' => 'oauth']);
         } catch (ClientException $e) {
             $exception = new HttpException($e->getMessage());
 
@@ -291,23 +232,6 @@ class Client
     }
 
     /**
-     * Attempts to set a given value.
-     *
-     * @param mixed   $value
-     * @param string  $key
-     *
-     * @return Client
-     */
-    protected function setConfig($value, $key)
-    {
-        if (property_exists($this, $key)) {
-            $this->$key = $value;
-        }
-
-        return $this;
-    }
-
-    /**
      * Set default location
      *
      * @param string $location
@@ -334,20 +258,6 @@ class Client
     }
 
     /**
-     * Updates the yelp client's http client to the given http client. Client.
-     *
-     * @param HttpClient  $client
-     *
-     * @return  Client
-     */
-    public function setHttpClient(HttpClient $client)
-    {
-        $this->httpClient = $client;
-
-        return $this;
-    }
-
-    /**
      * Set search limit
      *
      * @param integer $limit
@@ -360,21 +270,5 @@ class Client
             $this->searchLimit = $limit;
         }
         return $this;
-    }
-
-    /**
-     * Retrives the value of a given property from the client.
-     *
-     * @param  string  $property
-     *
-     * @return mixed|null
-     */
-    public function __get($property)
-    {
-        if (property_exists($this, $property)) {
-            return $this->$property;
-        }
-
-        return null;
     }
 }
