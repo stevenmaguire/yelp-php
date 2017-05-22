@@ -11,36 +11,86 @@
 
 ## Search for businesses
 
-```php
+See also [https://www.yelp.com/developers/documentation/v3/business_search](https://www.yelp.com/developers/documentation/v3/business_search)
 
+```php
+$parameters = [
+    'term' => 'bars',
+    'location' => 'Chicago, IL',
+    'latitude' => 41.8781,
+    'longitude' => 87.6298,
+    'radius' => 10,
+    'categories' => ['bars', 'french'],
+    'locale' => 'en_US',
+    'limit' => 10,
+    'offset' => 2,
+    'sort_by' => 'best_match',
+    'price' => '1,2,3',
+    'open_now' => true,
+    'open_at' => 1234566,
+    'attributes' => ['hot_and_new','deals']
+];
+
+$results = $client->getBusinessesSearchResults($parameters);
 ```
 
 ## Search for businesses by phone number
 
-```php
+See also [https://www.yelp.com/developers/documentation/v3/business_search_phone](https://www.yelp.com/developers/documentation/v3/business_search_phone)
 
+```php
+$results = $client->getBusinessesSearchResultsByPhone('312-867-5309');
 ```
 
 ## Retrieve details for a specific business by Yelp business id
 
-```php
+See also [https://www.yelp.com/developers/documentation/v3/business](https://www.yelp.com/developers/documentation/v3/business)
 
+```php
+$parameters = [
+    'locale' => 'en_US',
+];
+
+$business = $client->getBusiness('the-motel-bar-chicago', $parameters);
 ```
 
 ## Retrieve reviews for a specific business by Yelp business id
 
-```php
+See also [https://www.yelp.com/developers/documentation/v3/business_reviews](https://www.yelp.com/developers/documentation/v3/business_reviews)
 
+```php
+$parameters = [
+    'locale' => 'en_US',
+];
+
+$reviews = $client->getBusinessReviews('the-motel-bar-chicago', $parameters);
 ```
 
 ## Retrieve autocomplete suggestions
 
-```php
+See also [https://www.yelp.com/developers/documentation/v3/autocomplete](https://www.yelp.com/developers/documentation/v3/autocomplete)
 
+```php
+$parameters = [
+    'text' => 'Mot',
+    'latitude' => 41.8781,
+    'longitude' => 87.6298,
+    'locale' => 'en_US'
+];
+
+$results = $client->getAutocompleteResults($parameters);
 ```
 
 ## Search for transactions by type
 
-```php
+See also [https://www.yelp.com/developers/documentation/v3/transactions_search](https://www.yelp.com/developers/documentation/v3/transactions_search)
 
+```php
+$parameters = [
+    'latitude' => 41.8781,
+    'longitude' => 87.6298,
+    'location' => 'Chicago, IL'
+];
+
+$results = $client->getTransactionsSearchResultsByType('delivery', $parameters);
 ```
