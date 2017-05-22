@@ -30,9 +30,9 @@ trait HttpTrait
     /**
      * Prepares and appends parameters, if provided, to the given url.
      *
-     * @param  string  $url
-     * @param  array   $parameters
-     * @param  array   $options
+     * @param  string     $url
+     * @param  array      $parameters
+     * @param  string[]   $options
      *
      * @return string
      */
@@ -70,7 +70,7 @@ trait HttpTrait
     /**
      * Coerces given value into boolean and returns string representation
      *
-     * @param  mixed   $value
+     * @param  boolean   $value
      *
      * @return string
      */
@@ -98,7 +98,7 @@ trait HttpTrait
      * @param  string|resource|StreamInterface $body Message body.
      * @param  string $version HTTP protocol version.
      *
-     * @return GuzzleHttp\Psr7\Request
+     * @return Request
      */
     public function getRequest(
         $method,
@@ -137,15 +137,15 @@ trait HttpTrait
         } catch (BadResponseException $e) {
             $exception = new HttpException($e->getMessage());
 
-            throw $exception->setResponseBody($e->getResponse()->getBody());
+            throw $exception->setResponseBody((string) $e->getResponse()->getBody());
         }
     }
 
     /**
      * Updates query params array to apply yelp specific formatting rules.
      *
-     * @param  array   $params
-     * @param  array   $options
+     * @param  array      $params
+     * @param  string[]   $csvParams
      *
      * @return string
      */
@@ -167,7 +167,7 @@ trait HttpTrait
     /**
      * Makes a request to the Yelp API and returns the response
      *
-     * @param    Psr\Http\Message\RequestInterface $request
+     * @param    RequestInterface $request
      *
      * @return   stdClass The JSON response from the request
      * @throws   Stevenmaguire\Yelp\Exception\ClientConfigurationException
@@ -183,7 +183,7 @@ trait HttpTrait
     /**
      * Updates the yelp client's http client to the given http client. Client.
      *
-     * @param GuzzleHttp\Client  $client
+     * @param HttpClient  $client
      *
      * @return  mixed
      */

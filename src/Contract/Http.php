@@ -7,6 +7,12 @@ use Psr\Http\Message\RequestInterface;
 
 interface Http
 {
+    /**
+     * Creates default http client with appropriate authorization configuration.
+     *
+     * @return GuzzleHttp\Client
+     */
+    public function createDefaultHttpClient();
 
     /**
      * Returns the yelp client's http client to the given http client. Client.

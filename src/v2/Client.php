@@ -66,27 +66,6 @@ class Client implements HttpContract
     protected $searchLimit = 3;
 
     /**
-     * Search path
-     *
-     * @var string
-     */
-    protected $searchPath = '/v2/search/';
-
-    /**
-     * Business path
-     *
-     * @var string
-     */
-    protected $businessPath = '/v2/business/';
-
-    /**
-     * Phone search path
-     *
-     * @var string
-     */
-    protected $phoneSearchPath = '/v2/phone_search/';
-
-    /**
      * Create new client
      *
      * @param array $options
@@ -102,47 +81,15 @@ class Client implements HttpContract
         );
 
         $this->parseConfiguration($options, $defaults)
-            ->createHttpClient();
+            ->createDefaultHttpClient();
     }
 
     /**
-     * Build query string params using defaults
+     * Creates default http client with appropriate authorization configuration.
      *
-     * @param  array $attributes
-     *
-     * @return string
+     * @return GuzzleHttp\Client
      */
-    public function buildQueryParams($attributes = [])
-    {
-        $defaults = array(
-            'term' => $this->defaultTerm,
-            'location' => $this->defaultLocation,
-            'limit' => $this->searchLimit
-        );
-        $attributes = array_merge($defaults, $attributes);
-
-        return $this->prepareQueryParams($attributes);
-    }
-
-    /**
-     * Build unsigned url
-     *
-     * @param  string   $host
-     * @param  string   $path
-     *
-     * @return string   Unsigned url
-     */
-    protected function buildUnsignedUrl($host, $path)
-    {
-        return "http://" . $host . $path;
-    }
-
-    /**
-     * Builds and sets a preferred http client.
-     *
-     * @return Client
-     */
-    protected function createHttpClient()
+    public function createDefaultHttpClient()
     {
         $stack = HandlerStack::create();
 
@@ -163,72 +110,58 @@ class Client implements HttpContract
     }
 
     /**
-     * Query the Business API by business id
+     * Fetches a specific business by id.
      *
-     * @param    string   $businessId      The ID of the business to query
-     * @param    array    $attributes      Optional attributes to include in query string
+     * @param    string    $businessId
+     * @param    array     $parameters
      *
-     * @return   stdClass                   The JSON response from the request
-     */
-    public function getBusiness($businessId, $attributes = [])
-    {
-        $businessPath = $this->businessPath . urlencode($businessId) . "?" . $this->prepareQueryParams($attributes);
-
-        return $this->request($businessPath);
-    }
-
-    /**
-     * Makes a request to the Yelp API and returns the response
-     *
-     * @param    string $path    The path of the APi after the domain
-     *
-     * @return   stdClass The JSON response from the request
+     * @return   stdClass
      * @throws   Stevenmaguire\Yelp\Exception\HttpException
      */
-    protected function request($path)
+    public function getBusiness($businessId, $parameters = [])
     {
-        $url = $this->buildUnsignedUrl($this->apiHost, $path);
+        $path = $this->appendParametersToUrl('/v2/businesses/'.$businessId, $parameters);
+        $request = $this->getRequest('GET', $path);
 
-        try {
-            $response = $this->getHttpClient()->get($url, ['auth' => 'oauth']);
-        } catch (ClientException $e) {
-            $exception = new HttpException($e->getMessage());
-
-            throw $exception->setResponseBody($e->getResponse()->getBody());
-        }
-
-        return json_decode($response->getBody());
+        return $this->processRequest($request);
     }
 
     /**
-     * Query the Search API by a search term and location
+     * Fetches results from the Business Search API.
      *
-     * @param    array    $attributes   Query attributes
+     * @param    array    $parameters
      *
-     * @return   stdClass               The JSON response from the request
+     * @return   stdClass
+     * @throws   Stevenmaguire\Yelp\Exception\HttpException
      */
-    public function search($attributes = [])
+    public function search($parameters = [])
     {
-        $query_string = $this->buildQueryParams($attributes);
-        $searchPath = $this->searchPath . "?" . $query_string;
+        $parameters = array_merge([
+            'term' => $this->defaultTerm,
+            'location' => $this->defaultLocation,
+            'limit' => $this->searchLimit
+        ], $parameters);
 
-        return $this->request($searchPath);
+        $path = $this->appendParametersToUrl('/v2/search', $parameters);
+        $request = $this->getRequest('GET', $path);
+
+        return $this->processRequest($request);
     }
 
     /**
-     * Search for businesses by phone number
+     * Fetches results from the Business Search API by Phone.
      *
-     * @see https://www.yelp.com/developers/documentation/v2/phone_search
+     * @param    array    $parameters
      *
-     * @param    array    $attributes   Query attributes
-     *
-     * @return   stdClass               The JSON response from the request
+     * @return   stdClass
+     * @throws   Stevenmaguire\Yelp\Exception\HttpException
      */
-    public function searchByPhone($attributes = [])
+    public function searchByPhone($parameters = [])
     {
-        $searchPath = $this->phoneSearchPath . "?" . $this->prepareQueryParams($attributes);
+        $path = $this->appendParametersToUrl('/v2/phone_search', $parameters);
+        $request = $this->getRequest('GET', $path);
 
-        return $this->request($searchPath);
+        return $this->processRequest($request);
     }
 
     /**
@@ -241,6 +174,7 @@ class Client implements HttpContract
     public function setDefaultLocation($location)
     {
         $this->defaultLocation = $location;
+
         return $this;
     }
 
@@ -254,6 +188,7 @@ class Client implements HttpContract
     public function setDefaultTerm($term)
     {
         $this->defaultTerm = $term;
+
         return $this;
     }
 
@@ -269,6 +204,7 @@ class Client implements HttpContract
         if (is_int($limit)) {
             $this->searchLimit = $limit;
         }
+
         return $this;
     }
 }
