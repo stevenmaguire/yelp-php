@@ -38,14 +38,14 @@ trait HttpTrait
      */
     protected function appendParametersToUrl($url, array $parameters = array(), array $options = array())
     {
+        $url = rtrim($url, '?');
         $queryString = $this->prepareQueryParams($parameters, $options);
 
         if ($queryString) {
-            if (strpos($url, '?') !== false) {
-                $url .= '&' . $queryString;
-            } else {
-                $url .= '?' . $queryString;
-            }
+            $uri = new Uri($url);
+            $existingQuery = $uri->getQuery();
+            $updatedQuery = empty($existingQuery) ? $queryString : $existingQuery . '&' . $queryString;
+            $url = (string) $uri->withQuery($updatedQuery);
         }
 
         return $url;
@@ -125,7 +125,7 @@ trait HttpTrait
      */
     protected function prepareQueryParams($params = [], $options = [])
     {
-        array_walk($params, function ($value, $key) use (&$params) {
+        array_walk($params, function ($value, $key) use (&$params, $options) {
             if (is_bool($value)) {
                 $params[$key] = $value ? 'true' : 'false';
             }

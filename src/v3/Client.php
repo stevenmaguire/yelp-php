@@ -34,30 +34,37 @@ class Client implements HttpContract
         $this->parseConfiguration($options, $defaults);
 
         if (!$this->getHttpClient()) {
-            $this->setHttpClient(new HttpClient());
+            $this->setHttpClient($this->createDefaultClient());
         }
     }
 
     /**
-     * Fetches results from the Autocomplete API
+     * Creates default client with appropriate authorization header.
      *
-     * Parameters
-     *   text    string  Required. Text to return autocomplete suggestions for.
-     *   latitude    decimal Required if want to get autocomplete suggestions for businesses. Latitude of the location to look for business autocomplete suggestions.
-     *   longitude   decimal Required if want to get autocomplete suggestions for businesses. Longitude of the location to look for business autocomplete suggestions.
-     *   locale  string  Optional. Specify the locale to return the autocomplete suggestions in. See the list of supported locales.
+     * @return GuzzleHttp\Client
+     */
+    public function createDefaultClient()
+    {
+        return new HttpClient([
+            'headers' => [
+                'Authorization' => 'Bearer '.$this->accessToken,
+            ]
+        ]);
+    }
+
+    /**
+     * Fetches results from the Autocomplete API.
      *
      * @param    array    $parameters
      *
      * @return   stdClass
      * @throws   Stevenmaguire\Yelp\Exception\HttpException
+     * @link     https://www.yelp.com/developers/documentation/v3/autocomplete
      */
     public function getAutocompleteResults($parameters = [])
     {
-        $request = $this->getRequest(
-            'GET',
-            $this->appendParametersToUrl('/v3/autocomplete', $parameters)
-        );
+        $path = $this->appendParametersToUrl('/v3/autocomplete', $parameters);
+        $request = $this->getRequest('GET', $path);
 
         return $this->processRequest($request);
     }
@@ -70,10 +77,12 @@ class Client implements HttpContract
      *
      * @return   stdClass
      * @throws   Stevenmaguire\Yelp\Exception\HttpException
+     * @link     https://www.yelp.com/developers/documentation/v3/business
      */
     public function getBusiness($businessId, $parameters = [])
     {
-        $request = $this->getRequest('GET', '/v3/businesses/'.$businessId);
+        $path = $this->appendParametersToUrl('/v3/businesses/'.$businessId, $parameters);
+        $request = $this->getRequest('GET', $path);
 
         return $this->processRequest($request);
     }
@@ -86,36 +95,45 @@ class Client implements HttpContract
      *
      * @return   stdClass
      * @throws   Stevenmaguire\Yelp\Exception\HttpException
+     * @link     https://www.yelp.com/developers/documentation/v3/business_reviews
      */
     public function getBusinessReviews($businessId, $parameters = [])
     {
-        $request = $this->getRequest('GET', '/v3/businesses/'.$businessId.'/reviews');
+        $path = $this->appendParametersToUrl('/v3/businesses/'.$businessId.'/reviews', $parameters);
+        $request = $this->getRequest('GET', $path);
 
         return $this->processRequest($request);
     }
 
     /**
-     * Fetches results from the Business Search API
+     * Fetches results from the Business Search API.
      *
      * @param    array    $parameters
      *
      * @return   stdClass
      * @throws   Stevenmaguire\Yelp\Exception\HttpException
+     * @link     https://www.yelp.com/developers/documentation/v3/business_search
      */
     public function getBusinessesSearchResults($parameters = [])
     {
-        $request = $this->getRequest('GET', '/v3/businesses/search');
+        $options = [
+            'to_csv' => ['attributes', 'categories', 'price']
+        ];
+
+        $path = $this->appendParametersToUrl('/v3/businesses/search', $parameters, $options);
+        $request = $this->getRequest('GET', $path);
 
         return $this->processRequest($request);
     }
 
     /**
-     * Fetches results from the Business Search API by Phone
+     * Fetches results from the Business Search API by Phone.
      *
      * @param    string    $phoneNumber
      *
      * @return   stdClass
      * @throws   Stevenmaguire\Yelp\Exception\HttpException
+     * @link     https://www.yelp.com/developers/documentation/v3/business_search_phone
      */
     public function getBusinessesSearchResultsByPhone($phoneNumber)
     {
@@ -123,26 +141,26 @@ class Client implements HttpContract
             'phone' => $phoneNumber
         ];
 
-        $request = $this->getRequest(
-            'GET',
-            $this->appendParametersToUrl('/v3/businesses/search/phone', $parameters)
-        );
+        $path = $this->appendParametersToUrl('/v3/businesses/search/phone', $parameters);
+        $request = $this->getRequest('GET', $path);
 
         return $this->processRequest($request);
     }
 
     /**
-     * Fetches results from the Business Search API by Phone
+     * Fetches results from the Business Search API by Type.
      *
      * @param    string    $type
      * @param    array     $parameters
      *
      * @return   stdClass
      * @throws   Stevenmaguire\Yelp\Exception\HttpException
+     * @link     https://www.yelp.com/developers/documentation/v3/transactions_search
      */
     public function getTransactionsSearchResultsByType($type, $parameters = [])
     {
-        $request = $this->getRequest('GET', '/v3/transactions/'.$type.'/search');
+        $path = $this->appendParametersToUrl('/v3/transactions/'.$type.'/search', $parameters);
+        $request = $this->getRequest('GET', $path);
 
         return $this->processRequest($request);
     }

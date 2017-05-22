@@ -55,6 +55,19 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($httpClient, $client->getHttpClient());
     }
 
+    public function testDefaultClientIncludesAccessToken()
+    {
+        $client = new Yelp([
+            'accessToken' =>       'mock_access_token',
+            'apiHost' =>           'api.yelp.com'
+        ]);
+
+        $this->assertContains(
+            'mock_access_token',
+            $client->getHttpClient()->getConfig()['headers']['Authorization']
+        );
+    }
+
     public function testGetAutocompleteResults()
     {
         $path = '/v3/autocomplete';
@@ -101,7 +114,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $path = '/v3/businesses/'.$businessId;
         $payload = $this->getResponseJson('business');
 
-        // locale  string  Optional. Specify the locale to return the business information in. See the list of supported locales.
+        $parameters = [
+            'locale' => 'bar'
+        ];
 
         $stream = Phony::mock(StreamInterface::class);
         $stream->__toString->returns($payload);
@@ -113,15 +128,17 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $httpClient->send->returns($response->get());
 
         $results = $this->client->setHttpClient($httpClient->get())
-            ->getBusiness($businessId);
+            ->getBusiness($businessId, $parameters);
 
         $this->assertEquals(json_decode($payload), $results);
 
         Phony::inOrder(
             $httpClient->send->calledWith(
-                $this->callback(function ($request) use ($path) {
+                $this->callback(function ($request) use ($path, $parameters) {
+                    $queryString = http_build_query($parameters);
                     return $request->getMethod() === 'GET'
-                        && strpos((string) $request->getUri(), $path) !== false;
+                        && strpos((string) $request->getUri(), $path) !== false
+                        && ($queryString && strpos((string) $request->getUri(), $queryString) !== false);
                 })
             ),
             $response->getBody->called(),
@@ -134,8 +151,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $businessId = 'foo';
         $path = '/v3/businesses/'.$businessId.'/reviews';
         $payload = $this->getResponseJson('business_reviews');
-
-        // locale  string  Optional. Specify the locale to return the business information in. See the list of supported locales.
+        $parameters = [
+            'locale' => 'bar'
+        ];
 
         $stream = Phony::mock(StreamInterface::class);
         $stream->__toString->returns($payload);
@@ -147,15 +165,17 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $httpClient->send->returns($response->get());
 
         $results = $this->client->setHttpClient($httpClient->get())
-            ->getBusinessReviews($businessId);
+            ->getBusinessReviews($businessId, $parameters);
 
         $this->assertEquals(json_decode($payload), $results);
 
         Phony::inOrder(
             $httpClient->send->calledWith(
-                $this->callback(function ($request) use ($path) {
+                $this->callback(function ($request) use ($path, $parameters) {
+                    $queryString = http_build_query($parameters);
                     return $request->getMethod() === 'GET'
-                        && strpos((string) $request->getUri(), $path) !== false;
+                        && strpos((string) $request->getUri(), $path) !== false
+                        && ($queryString && strpos((string) $request->getUri(), $queryString) !== false);
                 })
             ),
             $response->getBody->called(),
@@ -168,20 +188,22 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $path = '/v3/businesses/search';
         $payload = $this->getResponseJson('business_search');
 
-        // term    string  Optional. Search term (e.g. "food", "restaurants"). If term isn’t included we search everything. The term keyword also accepts business names such as "Starbucks".
-        // location    string  Required if either latitude or longitude is not provided. Specifies the combination of "address, neighborhood, city, state or zip, optional country" to be used when searching for businesses.
-        // latitude    decimal Required if location is not provided. Latitude of the location you want to search nearby.
-        // longitude   decimal Required if location is not provided. Longitude of the location you want to search nearby.
-        // radius  int Optional. Search radius in meters. If the value is too large, a AREA_TOO_LARGE error may be returned. The max value is 40000 meters (25 miles).
-        // categories  string  Optional. Categories to filter the search results with. See the list of supported categories. The category filter can be a list of comma delimited categories. For example, "bars,french" will filter by Bars and French. The category identifier should be used (for example "discgolf", not "Disc Golf").
-        // locale  string  Optional. Specify the locale to return the business information in. See the list of supported locales.
-        // limit   int Optional. Number of business results to return. By default, it will return 20. Maximum is 50.
-        // offset  int Optional. Offset the list of returned business results by this amount.
-        // sort_by string  Optional. Sort the results by one of the these modes: best_match, rating, review_count or distance. By default it's best_match. The rating sort is not strictly sorted by the rating value, but by an adjusted rating value that takes into account the number of ratings, similar to a bayesian average. This is so a business with 1 rating of 5 stars doesn’t immediately jump to the top.
-        // price   string  Optional. Pricing levels to filter the search result with: 1 = $, 2 = $$, 3 = $$$, 4 = $$$$. The price filter can be a list of comma delimited pricing levels. For example, "1, 2, 3" will filter the results to show the ones that are $, $$, or $$$.
-        // open_now    boolean Optional. Default to false. When set to true, only return the businesses open now. Notice that open_at and open_now cannot be used together.
-        // open_at int Optional. An integer represending the Unix time in the same timezone of the search location. If specified, it will return business open at the given time. Notice that open_at and open_now cannot be used together.
-        // attributes  string
+        $parameters = [
+            'term' => 'foo',
+            'location' => 'bar',
+            'latitude' => 1.0000,
+            'longitude' => 1.0000,
+            'radius' => 10,
+            'categories' => ['bars', 'french'],
+            'locale' => 'bar',
+            'limit' => 10,
+            'offset' => 2,
+            'sort_by' => 'best_match',
+            'price' => '1,2,3',
+            'open_now' => true,
+            'open_at' => 1234566,
+            'attributes' => ['hot_and_new','deals']
+        ];
 
         $stream = Phony::mock(StreamInterface::class);
         $stream->__toString->returns($payload);
@@ -193,15 +215,20 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $httpClient->send->returns($response->get());
 
         $results = $this->client->setHttpClient($httpClient->get())
-            ->getBusinessesSearchResults();
+            ->getBusinessesSearchResults($parameters);
 
         $this->assertEquals(json_decode($payload), $results);
 
         Phony::inOrder(
             $httpClient->send->calledWith(
-                $this->callback(function ($request) use ($path) {
+                $this->callback(function ($request) use ($path, $parameters) {
+                    $parameters['open_now'] = 'true';
+                    $parameters['categories'] = implode(',', $parameters['categories']);
+                    $parameters['attributes'] = implode(',', $parameters['attributes']);
+                    $queryString = http_build_query($parameters);
                     return $request->getMethod() === 'GET'
-                        && strpos((string) $request->getUri(), $path) !== false;
+                        && strpos((string) $request->getUri(), $path) !== false
+                        && ($queryString && strpos((string) $request->getUri(), $queryString) !== false);
                 })
             ),
             $response->getBody->called(),
@@ -249,9 +276,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $path = '/v3/transactions/'.$type.'/search';
         $payload = $this->getResponseJson('business_search_by_phone');
 
-        // latitude    decimal Required when location isn't provided. Latitude of the location you want to deliver to.
-        // longitude   decimal Required when location isn't provided. Longitude of the location you want to deliver to.
-        // location    string  Required when latitude and longitude aren't provided. Address of the location you want to deliver to.
+        $parameters = [
+            'latitude' => 1.0000,
+            'longitude' => 1.0000,
+            'location' => 'bar'
+        ];
 
         $stream = Phony::mock(StreamInterface::class);
         $stream->__toString->returns($payload);
@@ -263,15 +292,17 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $httpClient->send->returns($response->get());
 
         $results = $this->client->setHttpClient($httpClient->get())
-            ->getTransactionsSearchResultsByType($type);
+            ->getTransactionsSearchResultsByType($type, $parameters);
 
         $this->assertEquals(json_decode($payload), $results);
 
         Phony::inOrder(
             $httpClient->send->calledWith(
-                $this->callback(function ($request) use ($path) {
+                $this->callback(function ($request) use ($path, $parameters) {
+                    $queryString = http_build_query($parameters);
                     return $request->getMethod() === 'GET'
-                        && strpos((string) $request->getUri(), $path) !== false;
+                        && strpos((string) $request->getUri(), $path) !== false
+                        && ($queryString && strpos((string) $request->getUri(), $queryString) !== false);
                 })
             ),
             $response->getBody->called(),
