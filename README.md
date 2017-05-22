@@ -36,9 +36,9 @@ Each version of the Yelp API maps to a different client, as the APIs are very di
         'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
     );
 
-    $client = new Stevenmaguire\Yelp\ClientFactory::makeWith(
+    $client = new \Stevenmaguire\Yelp\ClientFactory::makeWith(
         $options,
-        Stevenmaguire\Yelp\Version::TWO
+        \Stevenmaguire\Yelp\Version::TWO
     );
 ```
 
@@ -50,9 +50,9 @@ Each version of the Yelp API maps to a different client, as the APIs are very di
         'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
     );
 
-    $client = new Stevenmaguire\Yelp\ClientFactory::makeWith(
+    $client = new \Stevenmaguire\Yelp\ClientFactory::makeWith(
         $options,
-        Stevenmaguire\Yelp\Version::THREE
+        \Stevenmaguire\Yelp\Version::THREE
     );
 ```
 
@@ -75,7 +75,7 @@ $responseBodyObject = json_decode($responseBody);
 Both the [v3 client](API-GUIDE-v3.md) and the [v2 client](API-GUIDE-v2.md) expose some public methods that allow overiding default behavior by providing alternative HTTP clients and requests.
 
 ```php
-$client = new Stevenmaguire\Yelp\v3\Client(array(
+$client = new \Stevenmaguire\Yelp\v3\Client(array(
     'accessToken' => $accessToken,
 ));
 

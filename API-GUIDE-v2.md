@@ -3,7 +3,7 @@
 ## Create client explicitly
 
 ```php
-    $client = new Stevenmaguire\Yelp\v2\Client(array(
+    $client = new \Stevenmaguire\Yelp\v2\Client(array(
         'consumerKey' => 'YOUR COSUMER KEY',
         'consumerSecret' => 'YOUR CONSUMER SECRET',
         'token' => 'YOUR TOKEN',
@@ -48,7 +48,7 @@ $client->setDefaultLocation('Chicago, IL')  // default location for all searches
 
 ## Exceptions
 
-If the API request results in an Http error, the client will throw a `Stevenmaguire\Yelp\Exception\HttpException` that includes the response body, as a string, from the Yelp API.
+If the API request results in an Http error, the client will throw a `\Stevenmaguire\Yelp\Exception\HttpException` that includes the response body, as a string, from the Yelp API.
 
 ```php
 try {
