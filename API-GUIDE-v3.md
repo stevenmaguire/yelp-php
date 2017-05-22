@@ -2,7 +2,7 @@
 
 ## Create client explicitly
 
-Yelp API version 3 (Fusion) requires an OAuth2 access token to authenticate each request. The [oauth2-yelp](https://github.com/stevenmaguire/oauth2-yelp) is available to help obtain an access token.
+Yelp API version 3 (Fusion) [requires an OAuth2 access token to authenticate each request](https://www.yelp.com/developers/documentation/v3/authentication). The [oauth2-yelp](https://github.com/stevenmaguire/oauth2-yelp) is available to help obtain an access token.
 
 ```php
 // Get access token via oauth2-yelp library
@@ -103,4 +103,17 @@ $parameters = [
 ];
 
 $results = $client->getTransactionsSearchResultsByType('delivery', $parameters);
+```
+
+## Exceptions
+
+If the API request results in an Http error, the client will throw a `Stevenmaguire\Yelp\Exception\HttpException` that includes the response body, as a string, from the Yelp API.
+
+```php
+try {
+    $business = $client->getBusiness('the-motel-bar-chicago');
+} catch (\Stevenmaguire\Yelp\Exception\HttpException $e) {
+    $responseBody = $e->getResponseBody(); // string from Http request
+    $responseBodyObject = json_decode($responseBody);
+}
 ```
