@@ -52,6 +52,34 @@ trait HttpTrait
     }
 
     /**
+     * Flattens given array into comma separated value.
+     *
+     * @param  mixed   $input
+     *
+     * @return string|mixed
+     */
+    private function arrayToCsv($input)
+    {
+        if (is_array($input)) {
+            $input = implode(',', $input);
+        }
+
+        return $input;
+    }
+
+    /**
+     * Coerces given value into boolean and returns string representation
+     *
+     * @param  mixed   $value
+     *
+     * @return string
+     */
+    private function getBoolString($value)
+    {
+        return (bool) $value ? 'true' : 'false';
+    }
+
+    /**
      * Returns the yelp client's http client to the given http client. Client.
      *
      * @return  GuzzleHttp\Client|null
@@ -123,17 +151,15 @@ trait HttpTrait
      */
     protected function prepareQueryParams($params = [], $csvParams = [])
     {
-        $updateParam = function ($value, $key) use (&$params, $csvParams) {
+        array_walk($params, function ($value, $key) use (&$params, $csvParams) {
             if (is_bool($value)) {
-                $params[$key] = $value ? 'true' : 'false';
+                $params[$key] = $this->getBoolString($value);
             }
 
-            if (in_array($key, $csvParams) && is_array($value)) {
-                $params[$key] = implode(',', $value);
+            if (in_array($key, $csvParams)) {
+                $params[$key] = $this->arrayToCsv($value);
             }
-        };
-
-        array_walk($params, $updateParam);
+        });
 
         return http_build_query($params);
     }
