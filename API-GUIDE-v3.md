@@ -2,11 +2,21 @@
 
 ## Create client explicitly
 
+Yelp API version 3 (Fusion) requires an OAuth2 access token to authenticate each request. The [oauth2-yelp](https://github.com/stevenmaguire/oauth2-yelp) is available to help obtain an access token.
+
 ```php
-    $client = new Stevenmaguire\Yelp\v3\Client(array(
-        'accessToken' => '{your access token}',
-        'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
-    ));
+// Get access token via oauth2-yelp library
+$provider = new Stevenmaguire\OAuth2\Client\Provider\Yelp([
+    'clientId'          => '{yelp-client-id}',
+    'clientSecret'      => '{yelp-client-secret}'
+]);
+$accessToken = (string) $provider->getAccessToken('client_credentials');
+
+// Provide the access token to the yelp-php client
+$client = new Stevenmaguire\Yelp\v3\Client(array(
+    'accessToken' => $accessToken,
+    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+));
 ```
 
 ## Search for businesses
