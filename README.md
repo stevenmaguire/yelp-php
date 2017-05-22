@@ -28,32 +28,32 @@ Each version of the Yelp API maps to a different client, as the APIs are very di
 #### v2 Client Example
 
 ```php
-    $options = array(
-        'consumerKey' => 'YOUR COSUMER KEY',
-        'consumerSecret' => 'YOUR CONSUMER SECRET',
-        'token' => 'YOUR TOKEN',
-        'tokenSecret' => 'YOUR TOKEN SECRET',
-        'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
-    );
+$options = array(
+    'consumerKey' => 'YOUR COSUMER KEY',
+    'consumerSecret' => 'YOUR CONSUMER SECRET',
+    'token' => 'YOUR TOKEN',
+    'tokenSecret' => 'YOUR TOKEN SECRET',
+    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+);
 
-    $client = new \Stevenmaguire\Yelp\ClientFactory::makeWith(
-        $options,
-        \Stevenmaguire\Yelp\Version::TWO
-    );
+$client = new \Stevenmaguire\Yelp\ClientFactory::makeWith(
+    $options,
+    \Stevenmaguire\Yelp\Version::TWO
+);
 ```
 
 #### v3 Client Example
 
 ```php
-    $options = array(
-        'accessToken' => 'YOUR ACCESS TOKEN',
-        'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
-    );
+$options = array(
+    'accessToken' => 'YOUR ACCESS TOKEN',
+    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+);
 
-    $client = new \Stevenmaguire\Yelp\ClientFactory::makeWith(
-        $options,
-        \Stevenmaguire\Yelp\Version::THREE
-    );
+$client = new \Stevenmaguire\Yelp\ClientFactory::makeWith(
+    $options,
+    \Stevenmaguire\Yelp\Version::THREE
+);
 ```
 
 Version | Constant | Documentation
@@ -97,6 +97,40 @@ $response = $client->getResponse($request);
 
 // See the contents
 echo $response->getBody();
+```
+
+## Upgrading with Yelp API v2 support from `yelp-php 1.x` to  `yelp-php 2.x`
+
+```php
+// yelp-php 1.x
+$client = new Stevenmaguire\Yelp\Client(array(
+    'consumerKey' => 'YOUR COSUMER KEY',
+    'consumerSecret' => 'YOUR CONSUMER SECRET',
+    'token' => 'YOUR TOKEN',
+    'tokenSecret' => 'YOUR TOKEN SECRET',
+    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+));
+
+// yelp-php 2.x - option 1
+$client = new \Stevenmaguire\Yelp\ClientFactory::makeWith(
+    array(
+        'consumerKey' => 'YOUR COSUMER KEY',
+        'consumerSecret' => 'YOUR CONSUMER SECRET',
+        'token' => 'YOUR TOKEN',
+        'tokenSecret' => 'YOUR TOKEN SECRET',
+        'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+    ),
+    \Stevenmaguire\Yelp\Version::TWO
+);
+
+// yelp-php 2.x - option 2
+$client = new \Stevenmaguire\Yelp\v2\Client(array(
+    'consumerKey' => 'YOUR COSUMER KEY',
+    'consumerSecret' => 'YOUR CONSUMER SECRET',
+    'token' => 'YOUR TOKEN',
+    'tokenSecret' => 'YOUR TOKEN SECRET',
+    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+));
 ```
 
 ## Testing

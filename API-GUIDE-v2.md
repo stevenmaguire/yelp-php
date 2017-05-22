@@ -3,13 +3,13 @@
 ## Create client explicitly
 
 ```php
-    $client = new \Stevenmaguire\Yelp\v2\Client(array(
-        'consumerKey' => 'YOUR COSUMER KEY',
-        'consumerSecret' => 'YOUR CONSUMER SECRET',
-        'token' => 'YOUR TOKEN',
-        'tokenSecret' => 'YOUR TOKEN SECRET',
-        'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
-    ));
+$client = new \Stevenmaguire\Yelp\v2\Client(array(
+    'consumerKey' => 'YOUR COSUMER KEY',
+    'consumerSecret' => 'YOUR CONSUMER SECRET',
+    'token' => 'YOUR TOKEN',
+    'tokenSecret' => 'YOUR TOKEN SECRET',
+    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+));
 ```
 
 ## Search by keyword and location
