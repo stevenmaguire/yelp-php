@@ -38,5 +38,8 @@
             "Stevenmaguire\\Yelp\\Test\\": "tests/src/"
         }
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "suggest": {
+        "stevenmaguire/oauth2-yelp": "Provides functionality to obtain OAuth2 access tokens, needed to execute Yelp API v3 codepaths"
+    }
 }
