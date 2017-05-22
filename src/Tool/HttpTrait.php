@@ -123,28 +123,26 @@ trait HttpTrait
      */
     protected function prepareQueryParams($params = [], $options = [])
     {
-        array_walk($params, function ($value, $key) use (&$params, $options) {
+        $paramsToCsv = [];
+        if (isset($options['to_csv'])) {
+            if (!is_array($options['to_csv'])) {
+                 $options['to_csv'] = explode(',', $options['to_csv']);
+            }
+            $paramsToCsv = array_merge($paramsToCsv, $options['to_csv']);
+        }
+
+        array_walk($params, function ($value, $key) use (&$params, $paramsToCsv) {
             if (is_bool($value)) {
                 $params[$key] = $value ? 'true' : 'false';
             }
-            if (isset($options['to_csv'])) {
-                if (!is_array($options['to_csv'])) {
-                     $options['to_csv'] = explode(',', $options['to_csv']);
-                }
 
-                if (in_array($key, $options['to_csv']) && is_array($value)) {
-                    $params[$key] = implode(',', $value);
-                }
+            if (in_array($key, $paramsToCsv) && is_array($value)) {
+                $params[$key] = implode(',', $value);
             }
+
         });
 
-        $queryString = http_build_query($params);
-
-        if (strlen($queryString)) {
-            return $queryString;
-        }
-
-        return null;
+        return http_build_query($params) ?: null;
     }
 
     /**
