@@ -41,7 +41,7 @@ trait HttpTrait
         $url = rtrim($url, '?');
         $queryString = $this->prepareQueryParams($parameters, $options);
 
-        if (!is_null($queryString)) {
+        if ($queryString) {
             $uri = new Uri($url);
             $existingQuery = $uri->getQuery();
             $updatedQuery = empty($existingQuery) ? $queryString : $existingQuery . '&' . $queryString;
@@ -119,29 +119,23 @@ trait HttpTrait
      * @param  array   $params
      * @param  array   $options
      *
-     * @return string|null
+     * @return string
      */
-    protected function prepareQueryParams($params = [], $options = [])
+    protected function prepareQueryParams($params = [], $csvParams = [])
     {
-        $paramsToCsv = [];
-        if (isset($options['to_csv'])) {
-            if (!is_array($options['to_csv'])) {
-                 $options['to_csv'] = explode(',', $options['to_csv']);
-            }
-            $paramsToCsv = array_merge($paramsToCsv, $options['to_csv']);
-        }
-
-        array_walk($params, function ($value, $key) use (&$params, $paramsToCsv) {
+        $updateParam = function ($value, $key) use (&$params, $csvParams) {
             if (is_bool($value)) {
                 $params[$key] = $value ? 'true' : 'false';
             }
 
-            if (in_array($key, $paramsToCsv) && is_array($value)) {
+            if (in_array($key, $csvParams) && is_array($value)) {
                 $params[$key] = implode(',', $value);
             }
-        });
+        };
 
-        return http_build_query($params) ?: null;
+        array_walk($params, $updateParam);
+
+        return http_build_query($params);
     }
 
     /**

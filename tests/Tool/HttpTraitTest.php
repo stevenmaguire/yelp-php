@@ -48,34 +48,4 @@ class HttpTraitTest extends \PHPUnit_Framework_TestCase
         $result = $this->appendParametersToUrl($url, $parameters);
         $this->assertEquals($url . '&foo2=bar2', $result);
     }
-
-    public function testPreparingQueryParams()
-    {
-        $parameters = [
-            'foo' => 'bar',
-            'foo2' => 'bar2,bar3,bar4',
-            'foo3' => ['bar2', 'bar3', 'bar4'],
-        ];
-        $options = [
-            'to_csv' => 'foo2,foo3'
-        ];
-
-        $result = $this->prepareQueryParams($parameters, $options);
-        $this->assertEquals(http_build_query([
-            'foo' => 'bar',
-            'foo2' => 'bar2,bar3,bar4',
-            'foo3' => 'bar2,bar3,bar4',
-        ]), $result);
-
-        $options = [
-            'to_csv' => ['foo2' ,'foo3']
-        ];
-
-        $result = $this->prepareQueryParams($parameters, $options);
-        $this->assertEquals(http_build_query([
-            'foo' => 'bar',
-            'foo2' => 'bar2,bar3,bar4',
-            'foo3' => 'bar2,bar3,bar4',
-        ]), $result);
-    }
 }

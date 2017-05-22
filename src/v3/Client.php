@@ -116,11 +116,9 @@ class Client implements HttpContract
      */
     public function getBusinessesSearchResults($parameters = [])
     {
-        $options = [
-            'to_csv' => ['attributes', 'categories', 'price']
-        ];
+        $csvParams = ['attributes', 'categories', 'price'];
 
-        $path = $this->appendParametersToUrl('/v3/businesses/search', $parameters, $options);
+        $path = $this->appendParametersToUrl('/v3/businesses/search', $parameters, $csvParams);
         $request = $this->getRequest('GET', $path);
 
         return $this->processRequest($request);
