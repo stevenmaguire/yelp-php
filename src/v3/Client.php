@@ -34,20 +34,20 @@ class Client implements HttpContract
         $this->parseConfiguration($options, $defaults);
 
         if (!$this->getHttpClient()) {
-            $this->setHttpClient($this->createDefaultClient());
+            $this->setHttpClient($this->createDefaultHttpClient());
         }
     }
 
     /**
-     * Creates default client with appropriate authorization header.
+     * Creates default http client with appropriate authorization header.
      *
      * @return GuzzleHttp\Client
      */
-    public function createDefaultClient()
+    protected function createDefaultHttpClient()
     {
         return new HttpClient([
             'headers' => [
-                'Authorization' => 'Bearer '.$this->accessToken,
+                'Authorization' => 'Bearer ' . $this->accessToken,
             ]
         ]);
     }
@@ -73,7 +73,7 @@ class Client implements HttpContract
      * Fetches a specific business by id.
      *
      * @param    string    $businessId
-     * @param    array    $parameters
+     * @param    array     $parameters
      *
      * @return   stdClass
      * @throws   Stevenmaguire\Yelp\Exception\HttpException
@@ -91,7 +91,7 @@ class Client implements HttpContract
      * Fetches reviews for a specific business by id.
      *
      * @param    string    $businessId
-     * @param    array    $parameters
+     * @param    array     $parameters
      *
      * @return   stdClass
      * @throws   Stevenmaguire\Yelp\Exception\HttpException

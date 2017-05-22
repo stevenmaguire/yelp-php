@@ -23,7 +23,7 @@ trait HttpTrait
     /**
      * HTTP client
      *
-     * @var GuzzleHttp\Client
+     * @var \GuzzleHttp\Client
      */
     protected $httpClient;
 
@@ -41,7 +41,7 @@ trait HttpTrait
         $url = rtrim($url, '?');
         $queryString = $this->prepareQueryParams($parameters, $options);
 
-        if ($queryString) {
+        if (!is_null($queryString)) {
             $uri = new Uri($url);
             $existingQuery = $uri->getQuery();
             $updatedQuery = empty($existingQuery) ? $queryString : $existingQuery . '&' . $queryString;
@@ -79,17 +79,15 @@ trait HttpTrait
         $body = null,
         $version = '1.1'
     ) {
-        $uriComponents = parse_url($uri);
+        $uri = new Uri($uri);
 
-        if (!isset($uriComponents['host'])) {
-            $uriComponents['host'] = $this->apiHost;
+        if (!$uri->getHost()) {
+            $uri = $uri->withHost($this->apiHost);
         }
 
-        if (!isset($uriComponents['scheme'])) {
-            $uriComponents['scheme'] = 'https';
+        if (!$uri->getScheme()) {
+            $uri = $uri->withScheme('https');
         }
-
-        $uri = (string) Uri::fromParts($uriComponents);
 
         return new Request($method, $uri, $headers, $body, $version);
     }
@@ -152,7 +150,7 @@ trait HttpTrait
     /**
      * Makes a request to the Yelp API and returns the response
      *
-     * @param    string $path    The path of the APi after the domain
+     * @param    Psr\Http\Message\RequestInterface $request
      *
      * @return   stdClass The JSON response from the request
      * @throws   Stevenmaguire\Yelp\Exception\ClientConfigurationException
