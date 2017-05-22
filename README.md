@@ -70,6 +70,35 @@ $responseBody = $e->getResponseBody(); // string from Http request
 $responseBodyObject = json_decode($responseBody);
 ```
 
+### Advanced usage
+
+Both the [v3 client](API-GUIDE-v3.md) and the [v2 client](API-GUIDE-v2.md) expose some public methods that allow overiding default behavior by providing alternative HTTP clients and requests.
+
+```php
+$client = new Stevenmaguire\Yelp\v3\Client(array(
+    'accessToken' => $accessToken,
+));
+
+// Create a new guzzle http client
+$specialHttpClient = new \GuzzleHttp\Client([
+    // ... some special configuration
+]);
+
+// Update the yelp client with the new guzzle http client
+// then get business data
+$business = $client->setHttpClient($specialHttpClient)
+    ->getBusiness('the-motel-bar-chicago');
+
+// Create request for other yelp API resource not supported by yelp-php
+$request = $client->getRequest('GET', '/v3/some-future-endpoint');
+
+// Send that request
+$response = $client->getResponse($request);
+
+// See the contents
+echo $response->getBody();
+```
+
 ## Testing
 
 ``` bash
