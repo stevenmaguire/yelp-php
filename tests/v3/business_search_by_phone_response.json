@@ -1,0 +1,36 @@
+{
+  "total": 1,
+  "businesses": [
+    {
+      "rating": 4.5,
+      "price": "$$$$",
+      "phone": "+14157492060",
+      "id": "gary-danko-san-francisco",
+      "categories": [
+        {
+          "alias": "newamerican",
+          "title": "American (New)"
+        }
+      ],
+      "review_count": 4525,
+      "name": "Gary Danko",
+      "url": "https://www.yelp.com/biz/gary-danko-san-francisco",
+      "coordinates": {
+        "latitude": 37.80587,
+        "longitude": -122.42058
+      },
+      "image_url": "https://s3-media3.fl.yelpcdn.com/bphoto/--8oiPVp0AsjoWHqaY1rDQ/o.jpg",
+      "is_closed": false,
+      "location": {
+        "city": "San Francisco",
+        "country": "US",
+        "address2": "",
+        "address3": "",
+        "state": "CA",
+        "address1": "800 N Point St",
+        "zip_code": "94109"
+      },
+      "transactions": ["restaurant_reservation"]
+    }
+  ]
+}

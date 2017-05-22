@@ -1,8 +1,6 @@
 <?php namespace Stevenmaguire\Yelp\Exception;
 
-use \Exception as BaseException;
-
-class HttpException extends BaseException
+class HttpException extends \Exception
 {
     /**
      * Response body

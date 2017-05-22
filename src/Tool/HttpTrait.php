@@ -2,10 +2,13 @@
 
 namespace Stevenmaguire\Yelp\Tool;
 
+use \Exception;
 use GuzzleHttp\Client as HttpClient;
-use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
+use Stevenmaguire\Yelp\Exception\ClientConfigurationException;
 use Stevenmaguire\Yelp\Exception\HttpException;
 
 trait HttpTrait
@@ -23,6 +26,30 @@ trait HttpTrait
      * @var GuzzleHttp\Client
      */
     protected $httpClient;
+
+    /**
+     * Prepares and appends parameters, if provided, to the given url.
+     *
+     * @param  string  $url
+     * @param  array   $parameters
+     * @param  array   $options
+     *
+     * @return string
+     */
+    protected function appendParametersToUrl($url, array $parameters = array(), array $options = array())
+    {
+        $queryString = $this->prepareQueryParams($parameters, $options);
+
+        if ($queryString) {
+            if (strpos($url, '?') !== false) {
+                $url .= '&' . $queryString;
+            } else {
+                $url .= '?' . $queryString;
+            }
+        }
+
+        return $url;
+    }
 
     /**
      * Returns the yelp client's http client to the given http client. Client.
@@ -52,6 +79,18 @@ trait HttpTrait
         $body = null,
         $version = '1.1'
     ) {
+        $uriComponents = parse_url($uri);
+
+        if (!isset($uriComponents['host'])) {
+            $uriComponents['host'] = $this->apiHost;
+        }
+
+        if (!isset($uriComponents['scheme'])) {
+            $uriComponents['scheme'] = 'https';
+        }
+
+        $uri = (string) Uri::fromParts($uriComponents);
+
         return new Request($method, $uri, $headers, $body, $version);
     }
 
@@ -63,28 +102,51 @@ trait HttpTrait
      *
      * @param  RequestInterface $request
      * @return ResponseInterface
+     * @throws Stevenmaguire\Yelp\Exception\HttpException
      */
     public function getResponse(RequestInterface $request)
     {
-        return $this->getHttpClient()->send($request);
+        try {
+            return $this->getHttpClient()->send($request);
+        } catch (BadResponseException $e) {
+            $exception = new HttpException($e->getMessage());
+
+            throw $exception->setResponseBody($e->getResponse()->getBody());
+        }
     }
 
     /**
      * Updates query params array to apply yelp specific formatting rules.
      *
      * @param  array   $params
+     * @param  array   $options
      *
-     * @return string
+     * @return string|null
      */
-    protected function prepareQueryParams($params = [])
+    protected function prepareQueryParams($params = [], $options = [])
     {
         array_walk($params, function ($value, $key) use (&$params) {
             if (is_bool($value)) {
                 $params[$key] = $value ? 'true' : 'false';
             }
+            if (isset($options['to_csv'])) {
+                if (!is_array($options['to_csv'])) {
+                     $options['to_csv'] = explode(',', $options['to_csv']);
+                }
+
+                if (in_array($key, $options['to_csv']) && is_array($value)) {
+                    $params[$key] = implode(',', $value);
+                }
+            }
         });
 
-        return http_build_query($params);
+        $queryString = http_build_query($params);
+
+        if (strlen($queryString)) {
+            return $queryString;
+        }
+
+        return null;
     }
 
     /**
@@ -93,19 +155,14 @@ trait HttpTrait
      * @param    string $path    The path of the APi after the domain
      *
      * @return   stdClass The JSON response from the request
+     * @throws   Stevenmaguire\Yelp\Exception\ClientConfigurationException
      * @throws   Stevenmaguire\Yelp\Exception\HttpException
      */
     protected function processRequest(RequestInterface $request)
     {
-        try {
-            $response = $this->getResponse($request);
+        $response = $this->getResponse($request);
 
-            return json_decode($response->getBody());
-        } catch (ClientException $e) {
-            $exception = new HttpException($e->getMessage());
-
-            throw $exception->setResponseBody($e->getResponse()->getBody());
-        }
+        return json_decode($response->getBody());
     }
 
     /**

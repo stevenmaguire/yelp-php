@@ -1,6 +1,6 @@
 <?php namespace Stevenmaguire\Yelp\Exception;
 
-class InvalidVersionException extends \Exception
+class ClientConfigurationException extends \Exception
 {
     //
 }

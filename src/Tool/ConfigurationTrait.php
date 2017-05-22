@@ -64,7 +64,11 @@ trait ConfigurationTrait
      */
     protected function setConfig($value, $key)
     {
-        if (property_exists($this, $key)) {
+        $setter = 'set' . ucfirst($key);
+
+        if (method_exists($this, $setter)) {
+            $this->$setter($value);
+        } elseif (property_exists($this, $key)) {
             $this->$key = $value;
         }
 

@@ -2,11 +2,15 @@
 
 namespace Stevenmaguire\Yelp\Test\v3;
 
+use Eloquent\Phony\Phpunit\Phony;
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Response;
 use Mockery as m;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\StreamInterface;
 use Stevenmaguire\Yelp\Exception\HttpException;
 use Stevenmaguire\Yelp\v3\Client as Yelp;
 
@@ -25,28 +29,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         return file_get_contents(__DIR__.'/'.$type.'_response.json');
     }
 
-    protected function getHttpClient($path, $status = 200, $payload = null)
-    {
-        // $response = m::mock(ResponseInterface::class);
-        // $response->shouldReceive('getBody')->andReturn($payload);
-
-        // if ($status < 300) {
-        //     $client = m::mock(HttpClient::class);
-        //     $client->shouldReceive('get')->with(m::on(function ($url) use ($path) {
-        //         return strpos($url, $path) > 0;
-        //     }), ['auth' => 'oauth'])->andReturn($response);
-        // } else {
-        //     $mock = new MockHandler([
-        //         new Response($status, [], $payload),
-        //     ]);
-
-        //     $handler = HandlerStack::create($mock);
-        //     $client = new HttpClient(['handler' => $handler]);
-        // }
-
-        // return $client;
-    }
-
     public function testConfigurationMapper()
     {
         $config = [
@@ -60,26 +42,132 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($client->{uniqid()});
     }
 
+    public function testClientCanBeConfiguredWithHttpClient()
+    {
+        $httpClient = Phony::mock(HttpClient::class)->get();
+
+        $client = new Yelp([
+            'accessToken' =>       'mock_access_token',
+            'apiHost' =>           'api.yelp.com',
+            'httpClient' =>         $httpClient
+        ]);
+
+        $this->assertEquals($httpClient, $client->getHttpClient());
+    }
+
     public function testGetAutocompleteResults()
     {
-        // text    string  Required. Text to return autocomplete suggestions for.
-        // latitude    decimal Required if want to get autocomplete suggestions for businesses. Latitude of the location to look for business autocomplete suggestions.
-        // longitude   decimal Required if want to get autocomplete suggestions for businesses. Longitude of the location to look for business autocomplete suggestions.
-        // locale  string  Optional. Specify the locale to return the autocomplete suggestions in. See the list of supported locales.
+        $path = '/v3/autocomplete';
+        $payload = $this->getResponseJson('autocomplete');
+
+        $parameters = [
+            'text' => 'foo',
+            'latitude' => 1.0000,
+            'longitude' => 1.0000,
+            'locale' => 'bar'
+        ];
+
+        $stream = Phony::mock(StreamInterface::class);
+        $stream->__toString->returns($payload);
+
+        $response = Phony::mock(ResponseInterface::class);
+        $response->getBody->returns($stream->get());
+
+        $httpClient = Phony::mock(HttpClient::class);
+        $httpClient->send->returns($response->get());
+
+        $results = $this->client->setHttpClient($httpClient->get())
+            ->getAutocompleteResults($parameters);
+
+        $this->assertEquals(json_decode($payload), $results);
+
+        Phony::inOrder(
+            $httpClient->send->calledWith(
+                $this->callback(function ($request) use ($path, $parameters) {
+                    $queryString = http_build_query($parameters);
+                    return $request->getMethod() === 'GET'
+                        && strpos((string) $request->getUri(), $path) !== false
+                        && ($queryString && strpos((string) $request->getUri(), $queryString) !== false);
+                })
+            ),
+            $response->getBody->called(),
+            $stream->__toString->called()
+        );
     }
 
     public function testGetBusiness()
     {
+        $businessId = 'foo';
+        $path = '/v3/businesses/'.$businessId;
+        $payload = $this->getResponseJson('business');
+
         // locale  string  Optional. Specify the locale to return the business information in. See the list of supported locales.
+
+        $stream = Phony::mock(StreamInterface::class);
+        $stream->__toString->returns($payload);
+
+        $response = Phony::mock(ResponseInterface::class);
+        $response->getBody->returns($stream->get());
+
+        $httpClient = Phony::mock(HttpClient::class);
+        $httpClient->send->returns($response->get());
+
+        $results = $this->client->setHttpClient($httpClient->get())
+            ->getBusiness($businessId);
+
+        $this->assertEquals(json_decode($payload), $results);
+
+        Phony::inOrder(
+            $httpClient->send->calledWith(
+                $this->callback(function ($request) use ($path) {
+                    return $request->getMethod() === 'GET'
+                        && strpos((string) $request->getUri(), $path) !== false;
+                })
+            ),
+            $response->getBody->called(),
+            $stream->__toString->called()
+        );
     }
 
     public function testGetBusinessReviews()
     {
+        $businessId = 'foo';
+        $path = '/v3/businesses/'.$businessId.'/reviews';
+        $payload = $this->getResponseJson('business_reviews');
+
         // locale  string  Optional. Specify the locale to return the business information in. See the list of supported locales.
+
+        $stream = Phony::mock(StreamInterface::class);
+        $stream->__toString->returns($payload);
+
+        $response = Phony::mock(ResponseInterface::class);
+        $response->getBody->returns($stream->get());
+
+        $httpClient = Phony::mock(HttpClient::class);
+        $httpClient->send->returns($response->get());
+
+        $results = $this->client->setHttpClient($httpClient->get())
+            ->getBusinessReviews($businessId);
+
+        $this->assertEquals(json_decode($payload), $results);
+
+        Phony::inOrder(
+            $httpClient->send->calledWith(
+                $this->callback(function ($request) use ($path) {
+                    return $request->getMethod() === 'GET'
+                        && strpos((string) $request->getUri(), $path) !== false;
+                })
+            ),
+            $response->getBody->called(),
+            $stream->__toString->called()
+        );
     }
 
     public function testGetBusinessesSearchResults()
     {
+        $path = '/v3/businesses/search';
+        $payload = $this->getResponseJson('business_search');
+
         // term    string  Optional. Search term (e.g. "food", "restaurants"). If term isn’t included we search everything. The term keyword also accepts business names such as "Starbucks".
         // location    string  Required if either latitude or longitude is not provided. Specifies the combination of "address, neighborhood, city, state or zip, optional country" to be used when searching for businesses.
         // latitude    decimal Required if location is not provided. Latitude of the location you want to search nearby.
@@ -94,17 +182,141 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         // open_now    boolean Optional. Default to false. When set to true, only return the businesses open now. Notice that open_at and open_now cannot be used together.
         // open_at int Optional. An integer represending the Unix time in the same timezone of the search location. If specified, it will return business open at the given time. Notice that open_at and open_now cannot be used together.
         // attributes  string
+
+        $stream = Phony::mock(StreamInterface::class);
+        $stream->__toString->returns($payload);
+
+        $response = Phony::mock(ResponseInterface::class);
+        $response->getBody->returns($stream->get());
+
+        $httpClient = Phony::mock(HttpClient::class);
+        $httpClient->send->returns($response->get());
+
+        $results = $this->client->setHttpClient($httpClient->get())
+            ->getBusinessesSearchResults();
+
+        $this->assertEquals(json_decode($payload), $results);
+
+        Phony::inOrder(
+            $httpClient->send->calledWith(
+                $this->callback(function ($request) use ($path) {
+                    return $request->getMethod() === 'GET'
+                        && strpos((string) $request->getUri(), $path) !== false;
+                })
+            ),
+            $response->getBody->called(),
+            $stream->__toString->called()
+        );
     }
 
     public function testGetBusinessesSearchResultsByPhone()
     {
-        // phone    string  Required. Phone number of the business you want to search for. It must start with + and include the country code, like +14159083801.
+        $phone = 'foo-bar';
+        $path = '/v3/businesses/search/phone';
+        $payload = $this->getResponseJson('business_search_by_phone');
+
+        $stream = Phony::mock(StreamInterface::class);
+        $stream->__toString->returns($payload);
+
+        $response = Phony::mock(ResponseInterface::class);
+        $response->getBody->returns($stream->get());
+
+        $httpClient = Phony::mock(HttpClient::class);
+        $httpClient->send->returns($response->get());
+
+        $results = $this->client->setHttpClient($httpClient->get())
+            ->getBusinessesSearchResultsByPhone($phone);
+
+        $this->assertEquals(json_decode($payload), $results);
+
+        Phony::inOrder(
+            $httpClient->send->calledWith(
+                $this->callback(function ($request) use ($path, $phone) {
+                    $queryString = http_build_query(['phone' => $phone]);
+                    return $request->getMethod() === 'GET'
+                        && strpos((string) $request->getUri(), $path) !== false
+                        && strpos((string) $request->getUri(), $queryString) !== false;
+                })
+            ),
+            $response->getBody->called(),
+            $stream->__toString->called()
+        );
     }
 
     public function testGetTransactionsSearchResultsByType()
     {
+        $type = 'foo';
+        $path = '/v3/transactions/'.$type.'/search';
+        $payload = $this->getResponseJson('business_search_by_phone');
+
         // latitude    decimal Required when location isn't provided. Latitude of the location you want to deliver to.
         // longitude   decimal Required when location isn't provided. Longitude of the location you want to deliver to.
         // location    string  Required when latitude and longitude aren't provided. Address of the location you want to deliver to.
+
+        $stream = Phony::mock(StreamInterface::class);
+        $stream->__toString->returns($payload);
+
+        $response = Phony::mock(ResponseInterface::class);
+        $response->getBody->returns($stream->get());
+
+        $httpClient = Phony::mock(HttpClient::class);
+        $httpClient->send->returns($response->get());
+
+        $results = $this->client->setHttpClient($httpClient->get())
+            ->getTransactionsSearchResultsByType($type);
+
+        $this->assertEquals(json_decode($payload), $results);
+
+        Phony::inOrder(
+            $httpClient->send->calledWith(
+                $this->callback(function ($request) use ($path) {
+                    return $request->getMethod() === 'GET'
+                        && strpos((string) $request->getUri(), $path) !== false;
+                })
+            ),
+            $response->getBody->called(),
+            $stream->__toString->called()
+        );
+    }
+
+    /**
+     * @expectedException Stevenmaguire\Yelp\Exception\HttpException
+     */
+    public function testClientRaisesExceptionWhenHttpRequestFails()
+    {
+        $businessId = 'foo';
+        $path = '/v3/businesses/'.$businessId;
+        $payload = $this->getResponseJson('error');
+
+        // locale  string  Optional. Specify the locale to return the business information in. See the list of supported locales.
+
+        $stream = Phony::mock(StreamInterface::class);
+        $stream->__toString->returns($payload);
+
+        $response = Phony::mock(ResponseInterface::class);
+        $response->getBody->returns($stream->get());
+
+        $request = Phony::mock(RequestInterface::class);
+
+        $httpClient = Phony::mock(HttpClient::class);
+        $httpClient->send->throws(new BadResponseException(
+            'test exception',
+            $request->get(),
+            $response->get()
+        ));
+
+        $business = $this->client->setHttpClient($httpClient->get())
+            ->getBusiness($businessId);
+
+        Phony::inOrder(
+            $httpClient->send->calledWith(
+                $this->callback(function ($request) use ($path) {
+                    return $request->getMethod() === 'GET'
+                        && strpos((string) $request->getUri(), $path) !== false;
+                })
+            ),
+            $response->getBody->called(),
+            $stream->__toString->called()
+        );
     }
 }
