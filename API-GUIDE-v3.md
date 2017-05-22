@@ -9,31 +9,37 @@
     ));
 ```
 
-## Search by keyword and location
+## Search for businesses
 
 ```php
 
 ```
 
-## Search by phone number
+## Search for businesses by phone number
 
 ```php
 
 ```
 
-## Locate details for a specific business by Yelp business id
+## Retrieve details for a specific business by Yelp business id
 
 ```php
 
 ```
 
-You may include [action links](http://engineeringblog.yelp.com/2015/07/yelp-api-now-returns-action-links.html) in your results by passing additional parameters with your request.
+## Retrieve reviews for a specific business by Yelp business id
 
 ```php
 
 ```
 
-### Configure defaults
+## Retrieve autocomplete suggestions
+
+```php
+
+```
+
+## Search for transactions by type
 
 ```php
 

@@ -41,7 +41,7 @@ class Client implements HttpContract
     /**
      * Creates default http client with appropriate authorization configuration.
      *
-     * @return GuzzleHttp\Client
+     * @return HttpClient
      */
     public function createDefaultHttpClient()
     {

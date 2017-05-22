@@ -3,7 +3,6 @@
 namespace Stevenmaguire\Yelp\v2;
 
 use GuzzleHttp\Client as HttpClient;
-use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
 use Stevenmaguire\Yelp\Contract\Http as HttpContract;
@@ -80,14 +79,17 @@ class Client implements HttpContract
             'apiHost' => 'api.yelp.com'
         );
 
-        $this->parseConfiguration($options, $defaults)
-            ->createDefaultHttpClient();
+        $this->parseConfiguration($options, $defaults);
+
+        if (!$this->getHttpClient()) {
+            $this->setHttpClient($this->createDefaultHttpClient());
+        }
     }
 
     /**
      * Creates default http client with appropriate authorization configuration.
      *
-     * @return GuzzleHttp\Client
+     * @return HttpClient
      */
     public function createDefaultHttpClient()
     {
@@ -102,11 +104,9 @@ class Client implements HttpContract
 
         $stack->push($middleware);
 
-        $client = new HttpClient([
+        return new HttpClient([
             'handler' => $stack
         ]);
-
-        return $this->setHttpClient($client);
     }
 
     /**
