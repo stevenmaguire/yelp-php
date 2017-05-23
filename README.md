@@ -36,7 +36,7 @@ $options = array(
     'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
 );
 
-$client = new \Stevenmaguire\Yelp\ClientFactory::makeWith(
+$client = \Stevenmaguire\Yelp\ClientFactory::makeWith(
     $options,
     \Stevenmaguire\Yelp\Version::TWO
 );
@@ -50,7 +50,7 @@ $options = array(
     'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
 );
 
-$client = new \Stevenmaguire\Yelp\ClientFactory::makeWith(
+$client = \Stevenmaguire\Yelp\ClientFactory::makeWith(
     $options,
     \Stevenmaguire\Yelp\Version::THREE
 );
@@ -102,35 +102,27 @@ echo $response->getBody();
 ## Upgrading with Yelp API v2 support from `yelp-php 1.x` to  `yelp-php 2.x`
 
 ```php
-// yelp-php 1.x
-$client = new Stevenmaguire\Yelp\Client(array(
+// same options for all
+$options = array(
     'consumerKey' => 'YOUR COSUMER KEY',
     'consumerSecret' => 'YOUR CONSUMER SECRET',
     'token' => 'YOUR TOKEN',
     'tokenSecret' => 'YOUR TOKEN SECRET',
     'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
-));
+);
+
+
+// yelp-php 1.x
+$client = new Stevenmaguire\Yelp\Client($options);
 
 // yelp-php 2.x - option 1
-$client = new \Stevenmaguire\Yelp\ClientFactory::makeWith(
-    array(
-        'consumerKey' => 'YOUR COSUMER KEY',
-        'consumerSecret' => 'YOUR CONSUMER SECRET',
-        'token' => 'YOUR TOKEN',
-        'tokenSecret' => 'YOUR TOKEN SECRET',
-        'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
-    ),
+$client = \Stevenmaguire\Yelp\ClientFactory::makeWith(
+    $options,
     \Stevenmaguire\Yelp\Version::TWO
 );
 
 // yelp-php 2.x - option 2
-$client = new \Stevenmaguire\Yelp\v2\Client(array(
-    'consumerKey' => 'YOUR COSUMER KEY',
-    'consumerSecret' => 'YOUR CONSUMER SECRET',
-    'token' => 'YOUR TOKEN',
-    'tokenSecret' => 'YOUR TOKEN SECRET',
-    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
-));
+$client = new \Stevenmaguire\Yelp\v2\Client($options);
 ```
 
 ## Testing
