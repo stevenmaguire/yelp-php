@@ -3,8 +3,10 @@
 namespace Stevenmaguire\Yelp\v2;
 
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
+use Psr\Http\Message\RequestInterface;
 use Stevenmaguire\Yelp\Contract\Http as HttpContract;
 use Stevenmaguire\Yelp\Exception\HttpException;
 use Stevenmaguire\Yelp\Tool\ConfigurationTrait;
@@ -76,7 +78,8 @@ class Client implements HttpContract
             'consumerSecret' => null,
             'token' => null,
             'tokenSecret' => null,
-            'apiHost' => 'api.yelp.com'
+            'apiHost' => 'api.yelp.com',
+            // 'scheme' => 'http'
         );
 
         $this->parseConfiguration($options, $defaults);
@@ -120,10 +123,31 @@ class Client implements HttpContract
      */
     public function getBusiness($businessId, $parameters = [])
     {
-        $path = $this->appendParametersToUrl('/v2/businesses/'.$businessId, $parameters);
+        $path = $this->appendParametersToUrl('/v2/business/'.$businessId, $parameters);
         $request = $this->getRequest('GET', $path);
 
         return $this->processRequest($request);
+    }
+
+    /**
+     * Sends a request instance and returns a response instance.
+     *
+     * WARNING: This method does not attempt to catch exceptions caused by HTTP
+     * errors! It is recommended to wrap this method in a try/catch block.
+     *
+     * @param  RequestInterface $request
+     * @return ResponseInterface
+     * @throws Stevenmaguire\Yelp\Exception\HttpException
+     */
+    public function getResponse(RequestInterface $request)
+    {
+        try {
+            return $this->getHttpClient()->get((string) $request->getUri(), ['auth' => 'oauth']);
+        } catch (BadResponseException $e) {
+            $exception = new HttpException($e->getMessage());
+
+            throw $exception->setResponseBody((string) $e->getResponse()->getBody());
+        }
     }
 
     /**

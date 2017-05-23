@@ -28,6 +28,13 @@ trait HttpTrait
     protected $httpClient;
 
     /**
+     * HTTP scheme
+     *
+     * @var string
+     */
+    protected $scheme;
+
+    /**
      * Prepares and appends parameters, if provided, to the given url.
      *
      * @param  string     $url
@@ -114,7 +121,7 @@ trait HttpTrait
         }
 
         if (!$uri->getScheme()) {
-            $uri = $uri->withScheme('https');
+            $uri = $uri->withScheme(($this->scheme ?: 'https'));
         }
 
         return new Request($method, $uri, $headers, $body, $version);

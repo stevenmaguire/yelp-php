@@ -56,7 +56,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     public function testGetBusiness()
     {
         $businessId = 'foo';
-        $path = '/v2/businesses/'.$businessId;
+        $path = '/v2/business/'.$businessId;
         $payload = $this->getResponseJson('business');
 
         $parameters = [
@@ -70,7 +70,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $response->getBody->returns($stream->get());
 
         $httpClient = Phony::mock(HttpClient::class);
-        $httpClient->send->returns($response->get());
+        $httpClient->get->returns($response->get());
 
         $results = $this->client->setHttpClient($httpClient->get())
             ->getBusiness($businessId, $parameters);
@@ -78,13 +78,15 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(json_decode($payload), $results);
 
         Phony::inOrder(
-            $httpClient->send->calledWith(
-                $this->callback(function ($request) use ($path, $parameters) {
+            $httpClient->get->calledWith(
+                $this->callback(function ($url) use ($path, $parameters) {
                     $parameters['actionLinks'] = 'true';
                     $queryString = http_build_query($parameters);
-                    return $request->getMethod() === 'GET'
-                        && strpos((string) $request->getUri(), $path) !== false
-                        && ($queryString && strpos((string) $request->getUri(), $queryString) !== false);
+                    return strpos($url, $path) !== false
+                        && ($queryString && strpos($url, $queryString) !== false);
+                }),
+                $this->callback(function ($config) {
+                    return $config == ['auth' => 'oauth'];
                 })
             ),
             $response->getBody->called(),
@@ -111,7 +113,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $response->getBody->returns($stream->get());
 
         $httpClient = Phony::mock(HttpClient::class);
-        $httpClient->send->returns($response->get());
+        $httpClient->get->returns($response->get());
 
         $results = $this->client->setHttpClient($httpClient->get())
             ->search($parameters);
@@ -119,12 +121,14 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(json_decode($payload), $results);
 
         Phony::inOrder(
-            $httpClient->send->calledWith(
-                $this->callback(function ($request) use ($path, $parameters) {
+            $httpClient->get->calledWith(
+                $this->callback(function ($url) use ($path, $parameters) {
                     $queryString = http_build_query($parameters);
-                    return $request->getMethod() === 'GET'
-                        && strpos((string) $request->getUri(), $path) !== false
-                        && ($queryString && strpos((string) $request->getUri(), $queryString) !== false);
+                    return strpos($url, $path) !== false
+                        && ($queryString && strpos($url, $queryString) !== false);
+                }),
+                $this->callback(function ($config) {
+                    return $config == ['auth' => 'oauth'];
                 })
             ),
             $response->getBody->called(),
@@ -154,7 +158,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $response->getBody->returns($stream->get());
 
         $httpClient = Phony::mock(HttpClient::class);
-        $httpClient->send->returns($response->get());
+        $httpClient->get->returns($response->get());
 
         $results = $this->client->setDefaultLocation($defaults['location'])
             ->setDefaultTerm($defaults['term'])
@@ -165,12 +169,14 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(json_decode($payload), $results);
 
         Phony::inOrder(
-            $httpClient->send->calledWith(
-                $this->callback(function ($request) use ($path, $defaults) {
+            $httpClient->get->calledWith(
+                $this->callback(function ($url) use ($path, $defaults) {
                     $queryString = http_build_query($defaults);
-                    return $request->getMethod() === 'GET'
-                        && strpos((string) $request->getUri(), $path) !== false
-                        && ($queryString && strpos((string) $request->getUri(), $queryString) !== false);
+                    return strpos($url, $path) !== false
+                        && ($queryString && strpos($url, $queryString) !== false);
+                }),
+                $this->callback(function ($config) {
+                    return $config == ['auth' => 'oauth'];
                 })
             ),
             $response->getBody->called(),
@@ -195,7 +201,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $response->getBody->returns($stream->get());
 
         $httpClient = Phony::mock(HttpClient::class);
-        $httpClient->send->returns($response->get());
+        $httpClient->get->returns($response->get());
 
         $results = $this->client->setHttpClient($httpClient->get())
             ->searchByPhone($parameters);
@@ -203,12 +209,14 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(json_decode($payload), $results);
 
         Phony::inOrder(
-            $httpClient->send->calledWith(
-                $this->callback(function ($request) use ($path, $parameters) {
+            $httpClient->get->calledWith(
+                $this->callback(function ($url) use ($path, $parameters) {
                     $queryString = http_build_query($parameters);
-                    return $request->getMethod() === 'GET'
-                        && strpos((string) $request->getUri(), $path) !== false
-                        && strpos((string) $request->getUri(), $queryString) !== false;
+                    return strpos($url, $path) !== false
+                        && ($queryString && strpos($url, $queryString) !== false);
+                }),
+                $this->callback(function ($config) {
+                    return $config == ['auth' => 'oauth'];
                 })
             ),
             $response->getBody->called(),
@@ -234,7 +242,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $request = Phony::mock(RequestInterface::class);
 
         $httpClient = Phony::mock(HttpClient::class);
-        $httpClient->send->throws(new BadResponseException(
+        $httpClient->get->throws(new BadResponseException(
             'test exception',
             $request->get(),
             $response->get()
@@ -249,10 +257,12 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         }
 
         Phony::inOrder(
-            $httpClient->send->calledWith(
-                $this->callback(function ($request) use ($path) {
-                    return $request->getMethod() === 'GET'
-                        && strpos((string) $request->getUri(), $path) !== false;
+            $httpClient->get->calledWith(
+                $this->callback(function ($url) use ($path) {
+                    return strpos($url, $path) !== false;
+                }),
+                $this->callback(function ($config) {
+                    return $config == ['auth' => 'oauth'];
                 })
             ),
             $response->getBody->called(),
