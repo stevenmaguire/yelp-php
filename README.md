@@ -7,7 +7,7 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/stevenmaguire/yelp-php.svg?style=flat-square)](https://scrutinizer-ci.com/g/stevenmaguire/yelp-php)
 [![Total Downloads](https://img.shields.io/packagist/dt/stevenmaguire/yelp-php.svg?style=flat-square)](https://packagist.org/packages/stevenmaguire/yelp-php)
 
-A PHP client for authenticating with Yelp using OAuth 1 and consuming the search API.
+A PHP client for authenticating with Yelp using OAuth and consuming the API.
 
 ## Install
 
@@ -19,65 +19,116 @@ $ composer require stevenmaguire/yelp-php
 
 ## Usage
 
+This package currently supports `v2` and `v3` (Fusion) of the Yelp API. Each version of the Yelp API maps to a different client, as the APIs are very different. Each client has separate documentation; links provided below.
+
 ### Create client
 
-```php
-    $client = new Stevenmaguire\Yelp\Client(array(
-        'consumerKey' => 'YOUR COSUMER KEY',
-        'consumerSecret' => 'YOUR CONSUMER SECRET',
-        'token' => 'YOUR TOKEN',
-        'tokenSecret' => 'YOUR TOKEN SECRET',
-        'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
-    ));
-```
+Each version of the Yelp API maps to a different client, as the APIs are very different. A client factory is available to create appropriate clients.
 
-### Search by keyword and location
+#### v2 Client Example
 
 ```php
-$results = $client->search(array('term' => 'Sushi', 'location' => 'Chicago, IL'));
+$options = array(
+    'consumerKey' => 'YOUR COSUMER KEY',
+    'consumerSecret' => 'YOUR CONSUMER SECRET',
+    'token' => 'YOUR TOKEN',
+    'tokenSecret' => 'YOUR TOKEN SECRET',
+    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+);
+
+$client = \Stevenmaguire\Yelp\ClientFactory::makeWith(
+    $options,
+    \Stevenmaguire\Yelp\Version::TWO
+);
 ```
 
-### Search by phone number
+#### v3 Client Example
 
 ```php
-$results = $client->searchByPhone(array('phone' => '867-5309'));
+$options = array(
+    'accessToken' => 'YOUR ACCESS TOKEN',
+    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+);
+
+$client = \Stevenmaguire\Yelp\ClientFactory::makeWith(
+    $options,
+    \Stevenmaguire\Yelp\Version::THREE
+);
 ```
 
-### Locate details for a specific business by Yelp business id
-
-```php
-$results = $client->getBusiness('union-chicago-3');
-```
-
-You may include [action links](http://engineeringblog.yelp.com/2015/07/yelp-api-now-returns-action-links.html) in your results by passing additional parameters with your request.
-
-```php
-$resultsWithActionLinks = $client->getBusiness('union-chicago-3', [
-    'actionLinks' => true
-]);
-```
-
-### Configure defaults
-
-```php
-$client->setDefaultLocation('Chicago, IL')  // default location for all searches if location not provided
-    ->setDefaultTerm('Sushi')               // default keyword for all searches if term not provided
-    ->setSearchLimit(20);                   // number of records to return
-```
+Version | Constant | Documentation
+--------|----------|--------------
+v2 | `Stevenmaguire\Yelp\Version::TWO` | [API-GUIDE-v2.md](API-GUIDE-v2.md)
+v3 | `Stevenmaguire\Yelp\Version::THREE` | [API-GUIDE-v3.md](API-GUIDE-v3.md)
 
 ### Exceptions
 
-If the API request results in an Http error, the client will throw a `Stevenmaguire\Yelp\Exception` that includes the response body, as a string, from the Yelp API.
+If the API request results in an Http error, the client will throw a `Stevenmaguire\Yelp\Exception\HttpException` that includes the response body, as a string, from the Yelp API.
 
 ```php
 $responseBody = $e->getResponseBody(); // string from Http request
 $responseBodyObject = json_decode($responseBody);
 ```
 
+### Advanced usage
+
+Both the [v3 client](API-GUIDE-v3.md) and the [v2 client](API-GUIDE-v2.md) expose some public methods that allow overiding default behavior by providing alternative HTTP clients and requests.
+
+```php
+$client = new \Stevenmaguire\Yelp\v3\Client(array(
+    'accessToken' => $accessToken,
+));
+
+// Create a new guzzle http client
+$specialHttpClient = new \GuzzleHttp\Client([
+    // ... some special configuration
+]);
+
+// Update the yelp client with the new guzzle http client
+// then get business data
+$business = $client->setHttpClient($specialHttpClient)
+    ->getBusiness('the-motel-bar-chicago');
+
+// Create request for other yelp API resource not supported by yelp-php
+$request = $client->getRequest('GET', '/v3/some-future-endpoint');
+
+// Send that request
+$response = $client->getResponse($request);
+
+// See the contents
+echo $response->getBody();
+```
+
+## Upgrading with Yelp API v2 support from `yelp-php 1.x` to  `yelp-php 2.x`
+
+```php
+// same options for all
+$options = array(
+    'consumerKey' => 'YOUR COSUMER KEY',
+    'consumerSecret' => 'YOUR CONSUMER SECRET',
+    'token' => 'YOUR TOKEN',
+    'tokenSecret' => 'YOUR TOKEN SECRET',
+    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+);
+
+
+// yelp-php 1.x
+$client = new Stevenmaguire\Yelp\Client($options);
+
+// yelp-php 2.x - option 1
+$client = \Stevenmaguire\Yelp\ClientFactory::makeWith(
+    $options,
+    \Stevenmaguire\Yelp\Version::TWO
+);
+
+// yelp-php 2.x - option 2
+$client = new \Stevenmaguire\Yelp\v2\Client($options);
+```
+
 ## Testing
 
 ``` bash
-$ phpunit
+$ ./vendor/bin/phpunit
 ```
 
 ## Contributing

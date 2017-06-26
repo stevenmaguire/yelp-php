@@ -13,17 +13,18 @@
     "keywords": [
         "api",
         "oauth1",
+        "oauth2",
         "yelp",
         "php"
     ],
     "license": "MIT",
     "require": {
-        "php": ">=5.4.0",
+        "php": ">=5.6.0",
         "guzzlehttp/oauth-subscriber": "~0.3"
     },
     "require-dev": {
+        "eloquent/phony": "^0.14.1",
         "phpunit/phpunit": "~4.0",
-        "mockery/mockery": "~0.9",
         "squizlabs/php_codesniffer": "~2.0"
     },
     "autoload": {
@@ -36,5 +37,8 @@
             "Stevenmaguire\\Yelp\\Test\\": "tests/src/"
         }
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "suggest": {
+        "stevenmaguire/oauth2-yelp": "Provides functionality to obtain OAuth2 access tokens, needed to execute Yelp API v3 codepaths"
+    }
 }
