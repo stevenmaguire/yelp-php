@@ -1,6 +1,23 @@
 # Changelog
 All Notable changes to `yelp-php` will be documented in this file
 
+## 2.0.0 - 2017-06-26
+
+### Added
+- Support for Yelp API v3 (Fusion)
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Nothing
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 1.4.3 - 2016-03-28
 
 ### Added
