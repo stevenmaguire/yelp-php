@@ -20,6 +20,13 @@ class Client implements HttpContract
     protected $accessToken;
 
     /**
+     * Api key
+     *
+     * @var string
+     */
+    protected $apiKey;
+
+    /**
      * Creates new client
      *
      * @param array $options
@@ -28,7 +35,8 @@ class Client implements HttpContract
     {
         $defaults = [
             'accessToken' => null,
-            'apiHost' => 'api.yelp.com'
+            'apiHost' => 'api.yelp.com',
+            'apiKey' => null,
         ];
 
         $this->parseConfiguration($options, $defaults);
@@ -47,7 +55,7 @@ class Client implements HttpContract
     {
         return new HttpClient([
             'headers' => [
-                'Authorization' => 'Bearer ' . $this->accessToken,
+                'Authorization' => 'Bearer ' . $this->getBearerToken(),
             ]
         ]);
     }
@@ -67,6 +75,21 @@ class Client implements HttpContract
         $request = $this->getRequest('GET', $path);
 
         return $this->processRequest($request);
+    }
+
+    /**
+     * Returns the api key, if available, otherwise returns access token.
+     *
+     * @return string|null
+     * @link https://www.yelp.com/developers/documentation/v3/authentication#where-is-my-client-secret-going
+     */
+    private function getBearerToken()
+    {
+        if ($this->apiKey) {
+            return $this->apiKey;
+        }
+
+        return $this->accessToken;
     }
 
     /**

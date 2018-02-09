@@ -1,6 +1,23 @@
 # Changelog
 All Notable changes to `yelp-php` will be documented in this file
 
+## 2.1.0 - 2018-02-10
+
+### Added
+- Support for API Keys alongside Access Tokens; preference given to API Keys (https://www.yelp.com/developers/documentation/v3/authentication#where-is-my-client-secret-going)
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Nothing
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 2.0.0 - 2017-06-26
 
 ### Added

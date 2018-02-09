@@ -19,7 +19,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $this->client = new Yelp([
             'accessToken' =>       'mock_access_token',
-            'apiHost' =>           'api.yelp.com'
+            'apiHost' =>           'api.yelp.com',
+            'apiKey' =>            'mock_api_key',
         ]);
     }
 
@@ -32,12 +33,14 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $config = [
             'accessToken' => uniqid(),
-            'apiHost' => uniqid()
+            'apiHost' => uniqid(),
+            'apiKey' => uniqid()
         ];
 
         $client = new Yelp($config);
         $this->assertEquals($config['accessToken'], $client->accessToken);
         $this->assertEquals($config['apiHost'], $client->apiHost);
+        $this->assertEquals($config['apiKey'], $client->apiKey);
         $this->assertNull($client->{uniqid()});
     }
 
@@ -48,6 +51,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $client = new Yelp([
             'accessToken' =>       'mock_access_token',
             'apiHost' =>           'api.yelp.com',
+            'apiKey' =>            'mock_api_key',
             'httpClient' =>         $httpClient
         ]);
 
@@ -63,6 +67,33 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
         $this->assertContains(
             'mock_access_token',
+            $client->getHttpClient()->getConfig()['headers']['Authorization']
+        );
+    }
+
+    public function testDefaultClientIncludesApiKey()
+    {
+        $client = new Yelp([
+            'apiHost' =>           'api.yelp.com',
+            'apiKey' =>            'mock_api_key',
+        ]);
+
+        $this->assertContains(
+            'mock_api_key',
+            $client->getHttpClient()->getConfig()['headers']['Authorization']
+        );
+    }
+
+    public function testApiKeyIsPreferredOverAccessToken()
+    {
+        $client = new Yelp([
+            'accessToken' =>       'mock_access_token',
+            'apiHost' =>           'api.yelp.com',
+            'apiKey' =>            'mock_api_key',
+        ]);
+
+        $this->assertContains(
+            'mock_api_key',
             $client->getHttpClient()->getConfig()['headers']['Authorization']
         );
     }
