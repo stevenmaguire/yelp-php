@@ -19,6 +19,11 @@ $client = new \Stevenmaguire\Yelp\v3\Client(array(
 ));
 ```
 
+> Prior to December 7, 2017 `accessToken` was required to authenticate requests. Since then, `apiKey` is the preferred authentication method. This library supports both `accessToken` and `apiKey`, prioritizing `apiKey` over `accessToken` if both are provided.
+>
+> https://www.yelp.com/developers/documentation/v3/authentication#where-is-my-client-secret-going
+
+
 ## Search for businesses
 
 See also [https://www.yelp.com/developers/documentation/v3/business_search](https://www.yelp.com/developers/documentation/v3/business_search)

@@ -46,8 +46,9 @@ $client = \Stevenmaguire\Yelp\ClientFactory::makeWith(
 
 ```php
 $options = array(
-    'accessToken' => 'YOUR ACCESS TOKEN',
-    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com'
+    'accessToken' => 'YOUR ACCESS TOKEN', // Required, unless apiKey is provided
+    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com',
+    'apiKey' => 'YOUR ACCESS TOKEN', // Required, unless accessToken is provided
 );
 
 $client = \Stevenmaguire\Yelp\ClientFactory::makeWith(
@@ -55,6 +56,10 @@ $client = \Stevenmaguire\Yelp\ClientFactory::makeWith(
     \Stevenmaguire\Yelp\Version::THREE
 );
 ```
+
+> Prior to December 7, 2017 `accessToken` was required to authenticate requests. Since then, `apiKey` is the preferred authentication method. This library supports both `accessToken` and `apiKey`, prioritizing `apiKey` over `accessToken` if both are provided.
+>
+> https://www.yelp.com/developers/documentation/v3/authentication#where-is-my-client-secret-going
 
 Version | Constant | Documentation
 --------|----------|--------------

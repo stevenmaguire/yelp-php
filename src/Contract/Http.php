@@ -10,14 +10,14 @@ interface Http
     /**
      * Creates default http client with appropriate authorization configuration.
      *
-     * @return GuzzleHttp\Client
+     * @return \GuzzleHttp\Client
      */
     public function createDefaultHttpClient();
 
     /**
      * Returns the yelp client's http client to the given http client. Client.
      *
-     * @return  GuzzleHttp\Client|null
+     * @return  \GuzzleHttp\Client|null
      */
     public function getHttpClient();
 
@@ -30,7 +30,7 @@ interface Http
      * @param  string|resource|StreamInterface $body Message body.
      * @param  string $version HTTP protocol version.
      *
-     * @return GuzzleHttp\Psr7\Request
+     * @return \GuzzleHttp\Psr7\Request
      */
     public function getRequest(
         $method,
@@ -46,15 +46,15 @@ interface Http
      * WARNING: This method does not attempt to catch exceptions caused by HTTP
      * errors! It is recommended to wrap this method in a try/catch block.
      *
-     * @param  Psr\Http\Message\RequestInterface $request
-     * @return Psr\Http\Message\ResponseInterface
+     * @param  \Psr\Http\Message\RequestInterface $request
+     * @return \Psr\Http\Message\ResponseInterface
      */
     public function getResponse(RequestInterface $request);
 
     /**
      * Updates the yelp client's http client to the given http client. Client.
      *
-     * @param GuzzleHttp\Client  $client
+     * @param \GuzzleHttp\Client  $client
      *
      * @return  mixed
      */
