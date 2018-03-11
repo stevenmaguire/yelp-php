@@ -47,7 +47,7 @@ $client = \Stevenmaguire\Yelp\ClientFactory::makeWith(
 ```php
 $options = array(
     'accessToken' => 'YOUR ACCESS TOKEN', // Required, unless apiKey is provided
-    'apiHost' => 'api.yelp.com' // Optional, default 'api.yelp.com',
+    'apiHost' => 'api.yelp.com', // Optional, default 'api.yelp.com',
     'apiKey' => 'YOUR ACCESS TOKEN', // Required, unless accessToken is provided
 );
 
