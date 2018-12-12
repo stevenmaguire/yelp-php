@@ -66,6 +66,27 @@ Version | Constant | Documentation
 v2 | `Stevenmaguire\Yelp\Version::TWO` | [API-GUIDE-v2.md](API-GUIDE-v2.md)
 v3 | `Stevenmaguire\Yelp\Version::THREE` | [API-GUIDE-v3.md](API-GUIDE-v3.md)
 
+##### Get Rate Limit data from most recent request
+
+For the v3 client, [rate limiting data](https://www.yelp.com/developers/documentation/v3/rate_limiting) is avaiable after a recent request.
+
+```php
+// $latestRateLimit will be null if an http request hasn't been successfully completed.
+$latestRateLimit = $client->getRateLimit();
+
+// The maximum number of calls you can make per day
+$latestDailyLimit = $latestRateLimit->dailyLimit;
+
+// The number of calls remaining within the current day
+$latestRemaining = $latestRateLimit->remaining;
+
+// The time at which the current rate limiting window will expire as an ISO 8601 timestamp
+$latestResetTime = $latestRateLimit->resetTime;
+
+// The time at which the current rate limiting data was observed as an ISO 8601 timestamp
+$latestCreatedAt = $latestRateLimit->createdAt;
+```
+
 ### Exceptions
 
 If the API request results in an Http error, the client will throw a `Stevenmaguire\Yelp\Exception\HttpException` that includes the response body, as a string, from the Yelp API.

@@ -3,6 +3,7 @@
 namespace Stevenmaguire\Yelp\v3;
 
 use GuzzleHttp\Client as HttpClient;
+use Psr\Http\Message\ResponseInterface;
 use Stevenmaguire\Yelp\Contract\Http as HttpContract;
 use Stevenmaguire\Yelp\Tool\ConfigurationTrait;
 use Stevenmaguire\Yelp\Tool\HttpTrait;
@@ -25,6 +26,13 @@ class Client implements HttpContract
      * @var string
      */
     protected $apiKey;
+
+    /**
+     * Rate limit
+     *
+     * @var RateLimit|null
+     */
+    protected $rateLimit;
 
     /**
      * Creates new client
@@ -54,9 +62,7 @@ class Client implements HttpContract
     public function createDefaultHttpClient()
     {
         return new HttpClient([
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->getBearerToken(),
-            ]
+            'headers' => $this->getDefaultHeaders()
         ]);
     }
 
@@ -72,7 +78,7 @@ class Client implements HttpContract
     public function getAutocompleteResults($parameters = [])
     {
         $path = $this->appendParametersToUrl('/v3/autocomplete', $parameters);
-        $request = $this->getRequest('GET', $path);
+        $request = $this->getRequest('GET', $path, $this->getDefaultHeaders());
 
         return $this->processRequest($request);
     }
@@ -105,7 +111,7 @@ class Client implements HttpContract
     public function getBusiness($businessId, $parameters = [])
     {
         $path = $this->appendParametersToUrl('/v3/businesses/'.$businessId, $parameters);
-        $request = $this->getRequest('GET', $path);
+        $request = $this->getRequest('GET', $path, $this->getDefaultHeaders());
 
         return $this->processRequest($request);
     }
@@ -123,7 +129,7 @@ class Client implements HttpContract
     public function getBusinessReviews($businessId, $parameters = [])
     {
         $path = $this->appendParametersToUrl('/v3/businesses/'.$businessId.'/reviews', $parameters);
-        $request = $this->getRequest('GET', $path);
+        $request = $this->getRequest('GET', $path, $this->getDefaultHeaders());
 
         return $this->processRequest($request);
     }
@@ -142,7 +148,7 @@ class Client implements HttpContract
         $csvParams = ['attributes', 'categories', 'price'];
 
         $path = $this->appendParametersToUrl('/v3/businesses/search', $parameters, $csvParams);
-        $request = $this->getRequest('GET', $path);
+        $request = $this->getRequest('GET', $path, $this->getDefaultHeaders());
 
         return $this->processRequest($request);
     }
@@ -163,9 +169,35 @@ class Client implements HttpContract
         ];
 
         $path = $this->appendParametersToUrl('/v3/businesses/search/phone', $parameters);
-        $request = $this->getRequest('GET', $path);
+        $request = $this->getRequest('GET', $path, $this->getDefaultHeaders());
 
         return $this->processRequest($request);
+    }
+
+    /**
+     * Builds and returns default headers, specifically including the Authorization
+     * header used for authenticating HTTP requests to Yelp.
+     *
+     * @return array
+     */
+    protected function getDefaultHeaders()
+    {
+        return [
+            'Authorization' => 'Bearer ' . $this->getBearerToken(),
+        ];
+    }
+
+    /**
+     * Returns the latest rate limit metrics, absorbed from the HTTP headers of
+     * the most recent HTTP request to the Yelp v3 service.
+     *
+     * @return RateLimit|null
+     *
+     * @see https://www.yelp.com/developers/documentation/v3/rate_limiting
+     */
+    public function getRateLimit()
+    {
+        return $this->rateLimit;
     }
 
     /**
@@ -181,8 +213,25 @@ class Client implements HttpContract
     public function getTransactionsSearchResultsByType($type, $parameters = [])
     {
         $path = $this->appendParametersToUrl('/v3/transactions/'.$type.'/search', $parameters);
-        $request = $this->getRequest('GET', $path);
+        $request = $this->getRequest('GET', $path, $this->getDefaultHeaders());
 
         return $this->processRequest($request);
+    }
+
+    /**
+     * Provides a hook that handles the response before returning to the consumer.
+     *
+     * @param ResponseInterface $response
+     *
+     * @return  ResponseInterface
+     */
+    protected function handleResponse(ResponseInterface $response)
+    {
+        $this->rateLimit = new RateLimit;
+        $this->rateLimit->dailyLimit = (integer) $response->getHeaderLine('RateLimit-DailyLimit');
+        $this->rateLimit->remaining = (integer) $response->getHeaderLine('RateLimit-Remaining');
+        $this->rateLimit->resetTime = $response->getHeaderLine('RateLimit-ResetTime');
+
+        return $response;
     }
 }

@@ -2,11 +2,24 @@
 
 namespace Stevenmaguire\Yelp\Test\Tool;
 
+use Psr\Http\Message\ResponseInterface;
 use Stevenmaguire\Yelp\Tool\HttpTrait;
 
 class HttpTraitTest extends \PHPUnit_Framework_TestCase
 {
     use HttpTrait;
+
+    /**
+     * Provides a hook that handles the response before returning to the consumer.
+     *
+     * @param ResponseInterface $response
+     *
+     * @return  ResponseInterface
+     */
+    protected function handleResponse(ResponseInterface $response)
+    {
+        return $response;
+    }
 
     public function testGetRequestAddsHostWhenNotProvided()
     {

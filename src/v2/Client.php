@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Subscriber\Oauth\Oauth1;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Stevenmaguire\Yelp\Contract\Http as HttpContract;
 use Stevenmaguire\Yelp\Exception\HttpException;
 use Stevenmaguire\Yelp\Tool\ConfigurationTrait;
@@ -148,6 +149,18 @@ class Client implements HttpContract
 
             throw $exception->setResponseBody((string) $e->getResponse()->getBody());
         }
+    }
+
+    /**
+     * Provides a hook that handles the response before returning to the consumer.
+     *
+     * @param ResponseInterface $response
+     *
+     * @return  ResponseInterface
+     */
+    protected function handleResponse(ResponseInterface $response)
+    {
+        return $response;
     }
 
     /**
