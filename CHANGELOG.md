@@ -1,6 +1,23 @@
 # Changelog
 All Notable changes to `yelp-php` will be documented in this file
 
+## 2.2.0 - 2018-12-12
+
+### Added
+- Support for reporting Daily Rate Limits from previous successful HTTP requests to Yelp's v3 service.
+
+### Deprecated
+- Nothing
+
+### Fixed
+- Nothing
+
+### Removed
+- Nothing
+
+### Security
+- Nothing
+
 ## 2.1.0 - 2018-02-10
 
 ### Added
