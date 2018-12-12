@@ -143,6 +143,9 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $businessId = 'foo';
         $path = '/v3/businesses/'.$businessId;
         $payload = $this->getResponseJson('business');
+        $dailyLimit = rand();
+        $remaining = rand();
+        $resetTime = uniqid();
 
         $parameters = [
             'locale' => 'bar'
@@ -152,7 +155,11 @@ class ClientTest extends \PHPUnit_Framework_TestCase
         $stream->__toString->returns($payload);
 
         $response = Phony::mock(ResponseInterface::class);
+
         $response->getBody->returns($stream->get());
+        $response->getHeaderLine->with('RateLimit-DailyLimit')->returns($dailyLimit);
+        $response->getHeaderLine->with('RateLimit-Remaining')->returns($remaining);
+        $response->getHeaderLine->with('RateLimit-ResetTime')->returns($resetTime);
 
         $httpClient = Phony::mock(HttpClient::class);
         $httpClient->send->returns($response->get());
@@ -171,9 +178,16 @@ class ClientTest extends \PHPUnit_Framework_TestCase
                         && ($queryString && strpos((string) $request->getUri(), $queryString) !== false);
                 })
             ),
+            $response->getHeaderLine->calledWith('RateLimit-DailyLimit'),
+            $response->getHeaderLine->calledWith('RateLimit-Remaining'),
+            $response->getHeaderLine->calledWith('RateLimit-ResetTime'),
             $response->getBody->called(),
             $stream->__toString->called()
         );
+
+        $this->assertEquals($dailyLimit, $this->client->getRateLimit()->dailyLimit);
+        $this->assertEquals($remaining, $this->client->getRateLimit()->remaining);
+        $this->assertEquals($resetTime, $this->client->getRateLimit()->resetTime);
     }
 
     public function testGetBusinessReviews()

@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use Stevenmaguire\Yelp\Exception\ClientConfigurationException;
 use Stevenmaguire\Yelp\Exception\HttpException;
 
@@ -149,6 +150,15 @@ trait HttpTrait
     }
 
     /**
+     * Provides a hook that handles the response before returning to the consumer.
+     *
+     * @param ResponseInterface $response
+     *
+     * @return  ResponseInterface
+     */
+    abstract protected function handleResponse(ResponseInterface $response);
+
+    /**
      * Updates query params array to apply yelp specific formatting rules.
      *
      * @param  array      $params
@@ -182,7 +192,7 @@ trait HttpTrait
      */
     protected function processRequest(RequestInterface $request)
     {
-        $response = $this->getResponse($request);
+        $response = $this->handleResponse($this->getResponse($request));
 
         return json_decode($response->getBody());
     }
