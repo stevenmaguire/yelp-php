@@ -73,12 +73,16 @@ For the v3 client, [rate limiting data](https://www.yelp.com/developers/document
 ```php
 // $latestRateLimit will be null if an http request hasn't been successfully completed.
 $latestRateLimit = $client->getRateLimit();
+
 // The maximum number of calls you can make per day
 $latestDailyLimit = $latestRateLimit->dailyLimit;
+
 // The number of calls remaining within the current day
 $latestRemaining = $latestRateLimit->remaining;
+
 // The time at which the current rate limiting window will expire as an ISO 8601 timestamp
 $latestResetTime = $latestRateLimit->resetTime;
+
 // The time at which the current rate limiting data was observed as an ISO 8601 timestamp
 $latestCreatedAt = $latestRateLimit->createdAt;
 ```

@@ -192,6 +192,8 @@ class Client implements HttpContract
      * the most recent HTTP request to the Yelp v3 service.
      *
      * @return RateLimit|null
+     *
+     * @see https://www.yelp.com/developers/documentation/v3/rate_limiting
      */
     public function getRateLimit()
     {
